@@ -17,7 +17,7 @@ const write = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } ca
 
 export const loadConfig = () => read(CFG_KEY, null);
 export const saveConfig = (c) => (c ? write(CFG_KEY, c) : localStorage.removeItem(CFG_KEY));
-const enabled = (c) => !!(c && c.url && c.key && c.code);
+export const enabled = (c) => !!(c && c.url && c.key && c.code);
 
 // Einladungslink: …/#setup=<base64(JSON)> richtet die Verbindung mit einem Tipp ein.
 export function readSetupFromHash() {
@@ -36,8 +36,11 @@ export function inviteLink(cfg) {
   return `${location.origin}${location.pathname}#setup=${b64}`;
 }
 
-function api(cfg, path, opts = {}) {
-  return fetch(`${cfg.url.replace(/\/$/, '')}/rest/v1/${path}`, {
+// Adresse vereinheitlichen: angehängtes /rest/v1 und Schrägstriche entfernen
+export const baseUrl = (url) => String(url || '').trim().replace(/\/+$/, '').replace(/\/rest\/v1$/, '').replace(/\/+$/, '');
+
+export function api(cfg, path, opts = {}) {
+  return fetch(`${baseUrl(cfg.url)}/rest/v1/${path}`, {
     ...opts,
     headers: {
       apikey: cfg.key,
@@ -63,7 +66,7 @@ export async function testConfig(cfg) {
 }
 
 async function pullAll(cfg) {
-  const rows = await api(cfg, 'docs?select=collection,id,data');
+  const rows = await api(cfg, 'docs?select=collection,id,data&collection=neq.holeimages');
   const out = Object.fromEntries(COLLECTIONS.map((c) => [c, {}]));
   for (const r of rows || []) if (out[r.collection]) out[r.collection][r.id] = r.data;
   return out;

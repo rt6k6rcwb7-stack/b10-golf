@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import Modal, { DangerButton, Field, inputCls } from '../components/Modal.jsx';
 import { coursePar, num, uid } from '../lib/golf.js';
+import { compressImage } from '../lib/holeImages.js';
 
 const defaultHoles = (n) => Array.from({ length: n }, (_, i) => ({ par: 4, si: n === 9 ? i * 2 + 1 : i + 1, len: '', note: '' }));
 
-export default function Courses({ S, save, remove }) {
+export default function Courses({ S, save, remove, imgs }) {
   const [edit, setEdit] = useState(null);
   const list = Object.values(S.courses).sort((a, b) => (b.home ? 1 : 0) - (a.home ? 1 : 0) || a.name.localeCompare(b.name));
   return (
@@ -25,7 +26,7 @@ export default function Courses({ S, save, remove }) {
                   <div className="text-sm text-neutral-600">
                     {c.location ? `${c.location} · ` : ''}Par {coursePar(c)} · {(c.tees || []).map((t) => `${t.name}${t.crM ? ` ${t.crM}/${t.slopeM}` : ''}`).join(', ')}
                   </div>
-                  <div className="text-sm text-neutral-600">📍 GPS: {greens}/{(c.holes || []).length} Grüns eingemessen</div>
+                  <div className="text-sm text-neutral-600">📍 GPS: {greens}/{(c.holes || []).length} Grüns · 🖼 {imgs?.count(c.id) || 0}/{(c.holes || []).length} Lochbilder</div>
                 </div>
                 <span className="text-neutral-400">›</span>
               </button>
@@ -33,13 +34,26 @@ export default function Courses({ S, save, remove }) {
           );
         })}
       </ul>
-      {edit && <CourseModal S={S} id={edit === 'new' ? null : edit} onClose={() => setEdit(null)}
+      {edit && <CourseModal S={S} imgs={imgs} id={edit === 'new' ? null : edit} onClose={() => setEdit(null)}
         onSave={(id, d) => { save('courses', id, d); setEdit(null); }} onDelete={(id) => { remove('courses', id); setEdit(null); }} />}
     </div>
   );
 }
 
-function CourseModal({ S, id, onClose, onSave, onDelete }) {
+function CourseModal({ S, imgs, id, onClose, onSave, onDelete }) {
+  const [imgMsg, setImgMsg] = useState(null);
+  async function upload(files, firstHole) {
+    const list = [...files].sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }));
+    try {
+      for (let k = 0; k < list.length && firstHole + k <= f.holes.length; k++) {
+        setImgMsg(`Lade Bild ${k + 1} von ${list.length} hoch …`);
+        await imgs.setImage(id, firstHole + k, await compressImage(list[k]));
+      }
+      setImgMsg(list.length > 1 ? `${Math.min(list.length, f.holes.length - firstHole + 1)} Bilder gespeichert (nach Dateiname sortiert ab Loch ${firstHole}).` : 'Bild gespeichert.');
+    } catch (e) {
+      setImgMsg('Hochladen fehlgeschlagen – Verbindung prüfen und erneut versuchen.');
+    }
+  }
   const c = id ? S.courses[id] : { name: '', location: '', notes: '', home: false, holes: defaultHoles(18), tees: [{ name: 'Gelb', crM: '', slopeM: '', crW: '', slopeW: '' }] };
   const [f, setF] = useState(() => ({ ...c, holes: c.holes.map((h) => ({ ...h })), tees: (c.tees || []).map((t) => ({ ...t })) }));
   const [armed, setArmed] = useState(false);
@@ -48,7 +62,8 @@ function CourseModal({ S, id, onClose, onSave, onDelete }) {
   const sis = f.holes.map((h) => h.si).filter((v) => v !== '' && v != null).map(Number);
   const dupSi = sis.length !== new Set(sis).size;
   const usedIn = id && Object.values(S.tournaments).some((t) => (t.rounds || []).some((r) => r.courseId === id));
-  const small = `${inputCls} px-2 py-1.5`;
+  // Eigene Feldklasse ohne w-full, damit die festen Breiten greifen
+  const small = 'rounded-lg border-2 border-neutral-300 bg-white px-2 py-1.5 text-base tnum focus:border-turf-900 focus:outline-none';
   return (
     <Modal title={id ? 'Platz bearbeiten' : 'Neuer Platz'} onClose={onClose}>
       <div className="grid grid-cols-2 gap-2">
@@ -68,13 +83,13 @@ function CourseModal({ S, id, onClose, onSave, onDelete }) {
 
       <h3 className="text-lg font-black">Abschläge</h3>
       <div className="overflow-x-auto">
-        <table className="w-full border-collapse text-sm">
+        <table className="border-collapse text-sm">
           <thead><tr className="text-left text-xs uppercase tracking-wider text-neutral-600"><th className="p-1">Name</th><th className="p-1">CR H</th><th className="p-1">Slope H</th><th className="p-1">CR D</th><th className="p-1">Slope D</th><th /></tr></thead>
           <tbody>
             {f.tees.map((t, i) => (
               <tr key={i}>
                 {['name', 'crM', 'slopeM', 'crW', 'slopeW'].map((k) => (
-                  <td key={k} className="p-1"><input className={`${small} ${k === 'name' ? 'w-24' : 'w-20'}`} inputMode={k === 'name' ? 'text' : 'decimal'} value={t[k] ?? ''} onChange={(e) => setTee(i, k, e.target.value.replace(',', '.'))} /></td>
+                  <td key={k} className="p-1"><input className={`${small} ${k === 'name' ? 'w-24' : 'w-[4.5rem]'}`} inputMode={k === 'name' ? 'text' : 'decimal'} value={t[k] ?? ''} onChange={(e) => setTee(i, k, e.target.value.replace(',', '.'))} /></td>
                 ))}
                 <td><button className="px-2 text-2xl text-neutral-500" onClick={() => setF({ ...f, tees: f.tees.filter((_, j) => j !== i) })} aria-label="Abschlag entfernen">×</button></td>
               </tr>
@@ -87,23 +102,51 @@ function CourseModal({ S, id, onClose, onSave, onDelete }) {
       <h3 className="text-lg font-black">Löcher</h3>
       <p className="-mt-2 text-sm text-neutral-600">HCP = Handicap-Reihenfolge (1 = schwerstes Loch). Par gesamt {f.holes.reduce((s, h) => s + num(h.par, 0), 0)}.{dupSi && <b className="text-red-700"> HCP-Werte doppelt vergeben!</b>}</p>
       <div className="overflow-x-auto">
-        <table className="w-full border-collapse text-sm">
-          <thead><tr className="text-left text-xs uppercase tracking-wider text-neutral-600"><th className="p-1">#</th><th className="p-1">Par</th><th className="p-1">HCP</th><th className="p-1">Meter</th><th className="p-1">Besonderheit</th><th className="p-1">GPS</th></tr></thead>
+        <table className="border-collapse text-sm">
+          <thead><tr className="text-left text-xs uppercase tracking-wider text-neutral-600"><th className="p-1">#</th><th className="p-1">Par</th><th className="p-1">HCP</th><th className="p-1">Meter</th><th className="p-1">Besonderheit</th><th className="p-1">GPS</th><th className="p-1">Bild</th></tr></thead>
           <tbody>
             {f.holes.map((h, i) => (
               <tr key={i}>
                 <td className="p-1 text-center text-lg font-black">{i + 1}</td>
-                <td className="p-1"><input className={`${small} w-14`} inputMode="numeric" value={h.par ?? ''} onChange={(e) => setHole(i, 'par', e.target.value)} /></td>
-                <td className="p-1"><input className={`${small} w-14`} inputMode="numeric" value={h.si ?? ''} onChange={(e) => setHole(i, 'si', e.target.value)} /></td>
-                <td className="p-1"><input className={`${small} w-16`} inputMode="numeric" value={h.len ?? ''} onChange={(e) => setHole(i, 'len', e.target.value)} /></td>
-                <td className="p-1"><input className={`${small} min-w-40`} value={h.note ?? ''} placeholder="z. B. Wasser links" onChange={(e) => setHole(i, 'note', e.target.value)} /></td>
+                <td className="p-1"><input className={`${small} w-12 text-center`} inputMode="numeric" value={h.par ?? ''} onChange={(e) => setHole(i, 'par', e.target.value)} /></td>
+                <td className="p-1"><input className={`${small} w-12 text-center`} inputMode="numeric" value={h.si ?? ''} onChange={(e) => setHole(i, 'si', e.target.value)} /></td>
+                <td className="p-1"><input className={`${small} w-16 text-center`} inputMode="numeric" value={h.len ?? ''} onChange={(e) => setHole(i, 'len', e.target.value)} /></td>
+                <td className="p-1"><input className={`${small} w-48`} value={h.note ?? ''} placeholder="z. B. Wasser links" onChange={(e) => setHole(i, 'note', e.target.value)} /></td>
                 <td className="p-1 text-center">{h.green?.center || h.green?.front ? '✓' : ''}</td>
+                <td className="p-1">
+                  {id && imgs && (imgs.imageFor(id, i + 1) ? (
+                    <span className="flex items-center gap-1">
+                      <img src={imgs.imageFor(id, i + 1)} alt={`Loch ${i + 1}`} className="h-10 w-10 rounded object-cover" />
+                      <button className="px-1 text-xl text-neutral-500" aria-label={`Bild Loch ${i + 1} entfernen`} onClick={() => imgs.removeImage(id, i + 1).catch(() => setImgMsg('Löschen fehlgeschlagen.'))}>×</button>
+                    </span>
+                  ) : (
+                    <label className="block cursor-pointer rounded-lg border-2 border-dashed border-neutral-300 px-2 py-1.5 text-center text-lg" aria-label={`Bild für Loch ${i + 1} wählen`}>
+                      📷<input type="file" accept="image/*" hidden onChange={(e) => e.target.files.length && upload(e.target.files, i + 1)} />
+                    </label>
+                  ))}
+                </td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
       <p className="text-sm text-neutral-600">GPS-Punkte der Grüns werden in einer Runde über „📍 Grün einmessen“ gesetzt und gelten dann für alle.</p>
+
+      <h3 className="text-lg font-black">Lochbilder</h3>
+      {id ? (
+        <>
+          <p className="-mt-2 text-sm text-neutral-600">
+            Erscheinen beim Spielen über dem Loch (antippen = Vollbild) – für alle B10-Spieler. Einzeln über 📷 in der Tabelle,
+            oder alle auf einmal: Dateien so benennen, dass sie nach Loch sortiert sind (z. B. „01.jpg“ … „18.jpg“).
+            Bitte nur Bilder verwenden, die ihr nutzen dürft (z. B. eigene Fotos der Lochtafeln).
+          </p>
+          <label className="btn cursor-pointer self-start">
+            Mehrere Bilder wählen (ab Loch 1)
+            <input type="file" accept="image/*" multiple hidden onChange={(e) => e.target.files.length && upload(e.target.files, 1)} />
+          </label>
+          {imgMsg && <div className="text-sm font-bold">{imgMsg}</div>}
+        </>
+      ) : <p className="-mt-2 text-sm text-neutral-600">Platz zuerst speichern, dann können Lochbilder hinzugefügt werden.</p>}
 
       <div className="flex flex-wrap justify-between gap-2">
         {id ? <DangerButton armed={armed} setArmed={setArmed} confirmText={usedIn ? 'Wird im Turnier genutzt – trotzdem?' : 'Wirklich löschen?'} onConfirm={() => onDelete(id)}>Löschen</DangerButton> : <span />}

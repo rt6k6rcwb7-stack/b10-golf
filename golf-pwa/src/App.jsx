@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { readSetupFromHash, useShared } from './lib/cloud.js';
+import { useHoleImages } from './lib/holeImages.js';
 import seedData from './data/seed.json';
 import MyGolf from './views/MyGolf.jsx';
 import Tournaments from './views/Tournaments.jsx';
@@ -21,6 +22,7 @@ const write = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } ca
 export default function App() {
   const shared = useShared();
   const { data: S, save, remove, status, cfg } = shared;
+  const imgs = useHoleImages(cfg);
   const [tab, setTab] = useState(() => read(TAB_KEY, 'runden'));
   const [me, setMeRaw] = useState(() => read(ME_KEY, null));
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -78,10 +80,10 @@ export default function App() {
       )}
 
       <main className="flex-1 pb-24">
-        {tab === 'runden' && <MyGolf S={S} save={save} me={me} />}
-        {tab === 'turniere' && <Tournaments S={S} save={save} remove={remove} me={me} />}
+        {tab === 'runden' && <MyGolf S={S} save={save} me={me} imgs={imgs} />}
+        {tab === 'turniere' && <Tournaments S={S} save={save} remove={remove} me={me} imgs={imgs} />}
         {tab === 'spieler' && <Players S={S} save={save} remove={remove} me={me} setMe={setMe} />}
-        {tab === 'plaetze' && <Courses S={S} save={save} remove={remove} />}
+        {tab === 'plaetze' && <Courses S={S} save={save} remove={remove} imgs={imgs} />}
       </main>
 
       <nav className="fixed inset-x-0 bottom-0 z-20 border-t-2 border-neutral-200 bg-white pb-[env(safe-area-inset-bottom)]">

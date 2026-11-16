@@ -69,7 +69,30 @@ function Distances({ hole, geo, gpsOn, setGpsOn, onMeasure }) {
   );
 }
 
-export default function HoleEntry({ holes, values, onSet, recv, stableford, onMeasure, readOnly, startIdx = 0, footer }) {
+function HoleImage({ src, number }) {
+  const [big, setBig] = useState(false);
+  if (!src) return null;
+  return (
+    <>
+      <button className="overflow-hidden rounded-2xl border-2 border-neutral-200 bg-neutral-100" onClick={() => setBig(true)} aria-label={`Lochbild ${number} vergrößern`}>
+        <img src={src} alt={`Loch ${number}`} className="mx-auto max-h-64 w-full object-contain" />
+      </button>
+      {big && (
+        <div className="fixed inset-0 z-50 flex flex-col bg-black" onClick={() => setBig(false)}>
+          <div className="flex items-center justify-between px-4 pb-2 pt-[calc(0.5rem+env(safe-area-inset-top))] text-white">
+            <span className="text-lg font-black">Loch {number}</span>
+            <button className="text-3xl leading-none" aria-label="Schließen">×</button>
+          </div>
+          <div className="flex min-h-0 flex-1 items-center justify-center overflow-auto p-2">
+            <img src={src} alt={`Loch ${number}`} className="max-h-full max-w-full object-contain" />
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
+
+export default function HoleEntry({ holes, values, onSet, recv, stableford, onMeasure, readOnly, startIdx = 0, footer, imageFor }) {
   const [idx, setIdx] = useState(Math.min(startIdx, holes.length - 1));
   const [gpsOn, setGpsOnRaw] = useState(() => { try { return localStorage.getItem(GPS_KEY) === '1'; } catch { return false; } });
   const setGpsOn = (v) => { setGpsOnRaw(v); try { localStorage.setItem(GPS_KEY, v ? '1' : '0'); } catch { /* egal */ } };
@@ -111,6 +134,7 @@ export default function HoleEntry({ holes, values, onSet, recv, stableford, onMe
         </div>
       </div>
       {hole.note && <div className="rounded-xl bg-amber-100 px-3 py-2 font-bold text-amber-950">⚑ {hole.note}</div>}
+      <HoleImage src={imageFor ? imageFor(i) : null} number={hole.number} />
 
       <Distances hole={hole} geo={geo} gpsOn={gpsOn} setGpsOn={setGpsOn} onMeasure={onMeasure && ((which, pos) => onMeasure(i, which, pos))} />
 

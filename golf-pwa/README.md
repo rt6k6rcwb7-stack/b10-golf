@@ -28,6 +28,13 @@ Fehlen für ein Loch Grün-Koordinaten (z. B. beim Heimatplatz GLC Berlin-Wannse
 **GPS einschalten → „Grün einmessen“**, auf Grün-Anfang, -Mitte und -Ende stellen und jeweils „… hier“ tippen.
 Die Punkte werden direkt im Platz gespeichert und gelten nach dem Abgleich für alle B10-Spieler.
 
+## Lochbilder
+Unter **Plätze → Platz bearbeiten → Lochbilder**: einzeln über 📷 in der Löcher-Tabelle oder mehrere auf einmal
+(nach Dateiname sortiert, z. B. `01.jpg` … `18.jpg`, ab Loch 1). Die App verkleinert die Bilder (max. 1200 px, JPEG)
+und speichert sie in der Sammlung `holeimages` (eigene Einträge `<platzId>__<loch>`). Geräte laden ein Bild nur einmal
+und halten es in IndexedDB vor; abgeglichen wird beim Start und alle 5 Minuten. Beim Spielen erscheint das Bild über
+dem Loch, antippen = Vollbild.
+
 ## Plätze ergänzen
 Am einfachsten in der App unter **Plätze**. Format eines Platzes (z. B. für `src/data/seed.json`), pro Loch:
 ```json

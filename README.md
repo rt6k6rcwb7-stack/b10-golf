@@ -10,7 +10,7 @@ Golfrunden mit Freunden.
 - **Turniere** über mehrere Plätze: Zählspiel oder Stableford, Brutto- und Nettowertung nach WHS (Course Handicap aus Index,
   Course Rating, Slope und Par; Vorgabeschläge nach Handicap-Reihenfolge), Handicap-Anteil, max. Netto-Doppelbogey, „beste N Runden“.
   Alle Spieler tragen live ein; Hole19-Runden per Zahlenreihe übernehmen.
-- **Spieler** und **Plätze** (Par, HCP, Besonderheiten je Loch, Abschläge mit CR/Slope, GPS-Punkte der Grüns – auf dem Platz einmessbar).
+- **Spieler** und **Plätze** (Par, HCP, Besonderheiten je Loch, Abschläge mit CR/Slope, GPS-Punkte der Grüns – auf dem Platz einmessbar, Lochbilder).
 - Funktioniert offline; Änderungen werden hochgeladen, sobald wieder Netz da ist.
 
 ## Gemeinsame Daten (Supabase)
