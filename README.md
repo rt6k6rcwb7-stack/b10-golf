@@ -24,3 +24,4 @@ Außerhalb von Claude geöffnet (z. B. lokal) speichert die App nur auf dem Ger�
 ## Dateien
 - `index.html` – die komplette App (eine Datei; Quelle des Artifacts)
 - `logo-wannsee.png` – Logo des GLC Berlin-Wannsee (in `index.html` eingebettet)
+- `golf-pwa/` – persönliche Golf-PWA (React, Vite, Tailwind): Scorecard, GPS-Distanzen, Statistik – siehe `golf-pwa/README.md`
