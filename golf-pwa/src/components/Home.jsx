@@ -1,4 +1,15 @@
+import { useState } from 'react';
 import { fmtToPar, overallStats, roundStats } from '../lib/stats.js';
+
+// Eingemessene Grüns als courses.json-Ausschnitt (Liste der Löcher mit "green")
+function greensExport(greens, courses) {
+  const out = {};
+  for (const [cid, holes] of Object.entries(greens)) {
+    const c = courses.find((x) => x.id === cid);
+    out[cid] = (c?.holes || []).map((h) => ({ number: h.number, green: { ...(h.green || {}), ...(holes[h.number] || {}) } }));
+  }
+  return JSON.stringify(out, null, 2);
+}
 
 function Kpi({ label, value, sub }) {
   return (
@@ -10,7 +21,18 @@ function Kpi({ label, value, sub }) {
   );
 }
 
-export default function Home({ rounds, activeRound, onNew, onResume, onOpen }) {
+export default function Home({ rounds, activeRound, onNew, onResume, onOpen, greens = {}, courses = [] }) {
+  const [exportText, setExportText] = useState(null);
+  const measured = Object.values(greens).reduce((n, hs) => n + Object.keys(hs).length, 0);
+  async function copyGreens() {
+    const text = greensExport(greens, courses);
+    try {
+      await navigator.clipboard.writeText(text);
+      setExportText('kopiert');
+    } catch {
+      setExportText(text);
+    }
+  }
   const o = overallStats(rounds);
   const list = [...rounds].sort((a, b) => b.startedAt - a.startedAt);
   return (
@@ -49,6 +71,20 @@ export default function Home({ rounds, activeRound, onNew, onResume, onOpen }) {
           </p>
         )}
       </section>
+
+      {measured > 0 && (
+        <section className="flex flex-col gap-2 rounded-2xl border-2 border-neutral-200 p-3">
+          <div className="font-bold">{measured} Grün{measured === 1 ? '' : 's'} eingemessen</div>
+          <div className="text-sm text-neutral-600">
+            Die Punkte sind auf diesem Gerät gespeichert. Zum dauerhaften Übernehmen in <code>courses.json</code> kopieren.
+          </div>
+          <button className="btn" onClick={copyGreens}>Grün-Koordinaten kopieren</button>
+          {exportText === 'kopiert' && <div className="text-sm font-bold text-turf-800">In die Zwischenablage kopiert.</div>}
+          {exportText && exportText !== 'kopiert' && (
+            <textarea readOnly className="h-40 w-full rounded-xl border-2 border-neutral-300 p-2 font-mono text-xs" value={exportText} onFocus={(e) => e.target.select()} />
+          )}
+        </section>
+      )}
 
       <section className="flex flex-col gap-2">
         <h2 className="text-xl font-black">Runden</h2>

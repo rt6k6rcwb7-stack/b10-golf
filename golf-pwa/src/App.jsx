@@ -4,9 +4,10 @@ import Home from './components/Home.jsx';
 import NewRound from './components/NewRound.jsx';
 import Play from './components/Play.jsx';
 import RoundDetail from './components/RoundDetail.jsx';
-import { loadActiveId, loadRounds, saveActiveId, saveRounds } from './lib/storage.js';
+import { loadActiveId, loadGreens, loadRounds, saveActiveId, saveGreens, saveRounds } from './lib/storage.js';
 
-const courses = data.courses;
+// Heimatplatz zuerst
+const courses = [...data.courses].sort((a, b) => (b.home ? 1 : 0) - (a.home ? 1 : 0));
 const newId = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
 
 export default function App() {
@@ -15,9 +16,23 @@ export default function App() {
   const [view, setView] = useState(() => (loadActiveId() ? 'play' : 'home'));
   const [detailId, setDetailId] = useState(null);
   const [gpsOn, setGpsOn] = useState(false);
+  const [greens, setGreens] = useState(loadGreens);
 
   useEffect(() => saveRounds(rounds), [rounds]);
   useEffect(() => saveActiveId(activeId), [activeId]);
+  useEffect(() => saveGreens(greens), [greens]);
+
+  // Eingemessene Punkte haben Vorrang vor courses.json
+  function greenFor(courseId, hole) {
+    const base = courses.find((c) => c.id === courseId)?.holes.find((h) => h.number === hole.number)?.green || hole.green || {};
+    return { ...base, ...(greens[courseId]?.[hole.number] || {}) };
+  }
+  function setGreenPoint(courseId, number, which, pos) {
+    setGreens((g) => ({
+      ...g,
+      [courseId]: { ...(g[courseId] || {}), [number]: { ...(g[courseId]?.[number] || {}), [which]: pos } },
+    }));
+  }
 
   const activeRound = useMemo(() => rounds.find((r) => r.id === activeId) || null, [rounds, activeId]);
   const detailRound = rounds.find((r) => r.id === detailId);
@@ -57,6 +72,8 @@ export default function App() {
           onExit={() => { setGpsOn(false); setView('home'); }}
           gpsOn={gpsOn}
           setGpsOn={setGpsOn}
+          greenFor={(hole) => greenFor(activeRound.courseId, hole)}
+          onMeasure={(number, which, pos) => setGreenPoint(activeRound.courseId, number, which, pos)}
         />
       ) : view === 'new' ? (
         <NewRound courses={courses} onStart={startRound} onCancel={() => setView('home')} />
@@ -78,6 +95,8 @@ export default function App() {
           onNew={() => setView('new')}
           onResume={() => setView('play')}
           onOpen={(id) => { setDetailId(id); setView('detail'); }}
+          greens={greens}
+          courses={courses}
         />
       )}
     </div>

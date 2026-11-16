@@ -21,7 +21,9 @@ export default function NewRound({ courses, onStart, onCancel }) {
             onClick={() => setCourseId(c.id)}
             className={`rounded-2xl border-2 p-4 text-left ${c.id === courseId ? 'border-turf-900 bg-turf-50' : 'border-neutral-300'}`}
           >
-            <div className="text-xl font-bold">{c.name}</div>
+            <div className="text-xl font-bold">
+              {c.name} {c.home && <span className="ml-1 rounded-md bg-turf-900 px-2 py-0.5 align-middle text-xs font-bold uppercase tracking-wider text-white">Heimatplatz</span>}
+            </div>
             <div className="text-neutral-600">
               {c.location} · Par {c.holes.reduce((s, h) => s + h.par, 0)}
             </div>
@@ -42,6 +44,7 @@ export default function NewRound({ courses, onStart, onCancel }) {
           ))}
         </div>
       </div>
+      {course?.note && <p className="rounded-2xl bg-neutral-100 p-3 text-sm text-neutral-800">{course.note}</p>}
       {course?.placeholderCoordinates && (
         <p className="rounded-2xl bg-amber-100 p-3 text-sm text-amber-950">
           Dieser Beispielplatz hat Platzhalter-GPS-Koordinaten. Die Distanzen sind erst mit echten Grün-Koordinaten in

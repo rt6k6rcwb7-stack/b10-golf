@@ -20,6 +20,12 @@ GPS funktioniert im Browser nur über **https** oder **localhost**. Zum Testen a
 - **Speicherung**: alle Runden im LocalStorage (`golf.rounds.v1`); eine laufende Runde wird beim Öffnen fortgesetzt.
 - **Statistik**: Score und zu Par, Putts pro Runde, Greens in Regulation (Schläge − Putts ≤ Par − 2), Fairway-Quote.
 
+## Grüns auf dem Platz einmessen
+Fehlen für ein Loch Grün-Koordinaten (z. B. beim Heimatplatz GLC Berlin-Wannsee), in der Runde
+**GPS einschalten → „Grün einmessen“**, auf Grün-Anfang, -Mitte und -Ende stellen und jeweils „… hier“ tippen.
+Die Punkte werden auf dem Gerät gespeichert und haben Vorrang vor `courses.json`. In der Übersicht
+kopiert **„Grün-Koordinaten kopieren“** alle Punkte als JSON, um sie dauerhaft in `courses.json` zu übernehmen.
+
 ## Eigene Plätze ergänzen
 Datei `src/data/courses.json`, Liste `courses`. Pro Loch:
 ```json

@@ -1,6 +1,153 @@
 {
   "courses": [
     {
+      "id": "glc-wannsee",
+      "name": "GLC Berlin-Wannsee",
+      "location": "Berlin-Wannsee · 18-Loch-Platz",
+      "home": true,
+      "note": "Par und HCP laut Online-Scorecards; Course Rating/Slope dort uneinheitlich – bitte mit der Club-Scorecard prüfen. Grün-Koordinaten fehlen noch: auf dem Platz in der App einmessen.",
+      "tees": [
+        {
+          "name": "Weiß",
+          "courseRating": 72.9,
+          "slope": 134
+        },
+        {
+          "name": "Gelb",
+          "courseRating": 71.9,
+          "slope": 133
+        }
+      ],
+      "holes": [
+        {
+          "number": 1,
+          "par": 4,
+          "hcp": 5,
+          "tee": null,
+          "green": null
+        },
+        {
+          "number": 2,
+          "par": 4,
+          "hcp": 3,
+          "tee": null,
+          "green": null
+        },
+        {
+          "number": 3,
+          "par": 4,
+          "hcp": 11,
+          "tee": null,
+          "green": null
+        },
+        {
+          "number": 4,
+          "par": 5,
+          "hcp": 17,
+          "tee": null,
+          "green": null
+        },
+        {
+          "number": 5,
+          "par": 4,
+          "hcp": 7,
+          "tee": null,
+          "green": null
+        },
+        {
+          "number": 6,
+          "par": 4,
+          "hcp": 9,
+          "tee": null,
+          "green": null
+        },
+        {
+          "number": 7,
+          "par": 4,
+          "hcp": 1,
+          "tee": null,
+          "green": null
+        },
+        {
+          "number": 8,
+          "par": 3,
+          "hcp": 15,
+          "tee": null,
+          "green": null
+        },
+        {
+          "number": 9,
+          "par": 5,
+          "hcp": 13,
+          "tee": null,
+          "green": null
+        },
+        {
+          "number": 10,
+          "par": 3,
+          "hcp": 12,
+          "tee": null,
+          "green": null
+        },
+        {
+          "number": 11,
+          "par": 5,
+          "hcp": 2,
+          "tee": null,
+          "green": null
+        },
+        {
+          "number": 12,
+          "par": 4,
+          "hcp": 8,
+          "tee": null,
+          "green": null
+        },
+        {
+          "number": 13,
+          "par": 4,
+          "hcp": 16,
+          "tee": null,
+          "green": null
+        },
+        {
+          "number": 14,
+          "par": 3,
+          "hcp": 14,
+          "tee": null,
+          "green": null
+        },
+        {
+          "number": 15,
+          "par": 5,
+          "hcp": 6,
+          "tee": null,
+          "green": null
+        },
+        {
+          "number": 16,
+          "par": 4,
+          "hcp": 18,
+          "tee": null,
+          "green": null
+        },
+        {
+          "number": 17,
+          "par": 3,
+          "hcp": 10,
+          "tee": null,
+          "green": null
+        },
+        {
+          "number": 18,
+          "par": 4,
+          "hcp": 4,
+          "tee": null,
+          "green": null
+        }
+      ]
+    },
+    {
       "id": "beispielplatz",
       "name": "Beispielplatz",
       "location": "Platzhalter – bitte durch eigenen Platz ersetzen",
