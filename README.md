@@ -2,26 +2,27 @@
 
 Golfrunden mit Freunden.
 
-Turnier-App für die B10-Golffreunde – veröffentlicht als Claude-Artifact mit gemeinsamer Datenbank:
-https://claude.ai/artifact/3vS3KSimJz4AjiTkVnc69Y
+**App:** https://rt6k6rcwb7-stack.github.io/b10-golf/ (Progressive Web App – auf dem iPhone in Safari öffnen → Teilen → „Zum Home-Bildschirm“)
 
 ## Funktionen
-- **Spieler**: Name, Handicap-Index (auch Plus-HCP), Herren/Damen-Abschlag, Hole19-Name, „Das bin ich“.
-- **Plätze**: 9 oder 18 Löcher mit Par, Handicap-Reihenfolge (SI), Metern und Besonderheit je Loch;
-  Abschläge mit Course Rating und Slope (Herren/Damen); Platzregeln. Scorecard per Foto/Text von Claude auslesen lassen.
-- **Turniere** über mehrere Runden auf verschiedenen Plätzen: Zählspiel oder Stableford, Handicap-Anteil (%),
-  optional Max. Netto-Doppelbogey, optional nur die besten N Runden werten.
-- **Brutto- und Nettowertung** gesamt und je Runde (WHS: Course HCP = Index × Slope/113 + (CR − Par), Vorgabeschläge nach SI).
-- **Eingabe durch alle Spieler**, live für alle sichtbar: Loch für Loch mit −/+, oder **Hole19-Runde übernehmen**
-  (Screenshot der Hole19-Scorekarte oder kopierter Text wird von Claude ausgelesen, alternativ Zahlenreihe eintippen).
-- Scorekarten mit Birdie-Kreis / Bogey-Quadrat, „erfasst von“.
+- **Runden**: eigene Runden mit Schlägen, Putts und Fairway pro Loch, GPS-Distanz zu Grün-Anfang/-Mitte/-Ende, Statistik
+  (Ø-Score, Putts, Greens in Regulation, Fairway-Quote – inkl. der eigenen Turnierrunden).
+- **Turniere** über mehrere Plätze: Zählspiel oder Stableford, Brutto- und Nettowertung nach WHS (Course Handicap aus Index,
+  Course Rating, Slope und Par; Vorgabeschläge nach Handicap-Reihenfolge), Handicap-Anteil, max. Netto-Doppelbogey, „beste N Runden“.
+  Alle Spieler tragen live ein; Hole19-Runden per Zahlenreihe übernehmen.
+- **Spieler** und **Plätze** (Par, HCP, Besonderheiten je Loch, Abschläge mit CR/Slope, GPS-Punkte der Grüns – auf dem Platz einmessbar).
+- Funktioniert offline; Änderungen werden hochgeladen, sobald wieder Netz da ist.
 
-## Zugriff für die Freunde
-Im Artifact über **Teilen** die Freunde einladen. Damit sie eintragen können, brauchen sie mindestens die Stufe
-*Mitwirkende/r (Contributor)* bzw. *Bearbeiter/in*; Betrachter können nur lesen.
-Außerhalb von Claude geöffnet (z. B. lokal) speichert die App nur auf dem Gerät.
+## Gemeinsame Daten (Supabase)
+Spieler, Plätze, Turniere und Scorekarten liegen in einer kostenlosen Supabase-Datenbank. Einrichtung einmalig:
+1. https://supabase.com → kostenloses Konto → **New project** (Region Frankfurt, Passwort egal merken).
+2. **SQL Editor** → Inhalt von [`golf-pwa/supabase/setup.sql`](golf-pwa/supabase/setup.sql) einfügen, `GRUPPEN-CODE` durch einen eigenen Code ersetzen → **Run**.
+3. **Project Settings → API**: *Project URL* und *anon public key* kopieren.
+4. In der App: ⚙︎ oben rechts → URL, Key und Gruppen-Code eintragen → **Verbinden** → **Einladungslink kopieren** und an die B10 schicken.
 
-## Dateien
-- `index.html` – die komplette App (eine Datei; Quelle des Artifacts)
-- `logo-wannsee.png` – Logo des GLC Berlin-Wannsee (in `index.html` eingebettet)
-- `golf-pwa/` – persönliche Golf-PWA (React, Vite, Tailwind): Scorecard, GPS-Distanzen, Statistik – siehe `golf-pwa/README.md`
+Der Gruppen-Code steht nur im Einladungslink und in der Datenbank – nie im Repository.
+
+## Ordner
+- `golf-pwa/` – die App (React, Vite, Tailwind), siehe `golf-pwa/README.md`
+- `archiv/` – frühere Turnier-App als Claude-Artifact (abgelöst)
+- `logo-wannsee.png` – Logo des GLC Berlin-Wannsee

@@ -14,35 +14,36 @@ GPS funktioniert im Browser nur über **https** oder **localhost**. Zum Testen a
 über https hosten (z. B. GitHub Pages, Netlify) und dort „Zum Home-Bildschirm“ wählen.
 
 ## Funktionen
-- **Scorecard**: Platz wählen, 18 Löcher, Front 9 oder Back 9; pro Loch Schläge, Putts und Fairway (Links/Mitte/Rechts)
-  über große, kontrastreiche Buttons. Leeres Schlag-Feld antippen = Par.
-- **GPS-Distanz**: Live-Meter zu Grün-Anfang, -Mitte und -Ende (Geolocation-API, `watchPosition`, hohe Genauigkeit).
-- **Speicherung**: alle Runden im LocalStorage (`golf.rounds.v1`); eine laufende Runde wird beim Öffnen fortgesetzt.
-- **Statistik**: Score und zu Par, Putts pro Runde, Greens in Regulation (Schläge − Putts ≤ Par − 2), Fairway-Quote.
+Vier Bereiche (Tabs): **Runden** (eigene Runden + Statistik), **Turniere** (Leaderboard Brutto/Netto, Scorekarten),
+**Spieler**, **Plätze**. ⚙︎ oben rechts: „Ich bin …“, Verbindung zur B10-Gruppe, Einladungslink.
+
+Datenhaltung:
+- Eigene Runden: nur auf dem Gerät (`golf.rounds.v1`).
+- Spieler, Plätze, Turniere, Scorekarten: Supabase-Tabelle `docs` (`src/lib/cloud.js`), lokal zwischengespeichert;
+  Änderungen gehen erst in eine Warteschlange und werden hochgeladen, sobald Netz da ist (Abgleich alle 15 s).
+- Ohne Verbindung startet die App mit den B10-Startdaten aus `src/data/seed.json`.
 
 ## Grüns auf dem Platz einmessen
 Fehlen für ein Loch Grün-Koordinaten (z. B. beim Heimatplatz GLC Berlin-Wannsee), in der Runde
 **GPS einschalten → „Grün einmessen“**, auf Grün-Anfang, -Mitte und -Ende stellen und jeweils „… hier“ tippen.
-Die Punkte werden auf dem Gerät gespeichert und haben Vorrang vor `courses.json`. In der Übersicht
-kopiert **„Grün-Koordinaten kopieren“** alle Punkte als JSON, um sie dauerhaft in `courses.json` zu übernehmen.
+Die Punkte werden direkt im Platz gespeichert und gelten nach dem Abgleich für alle B10-Spieler.
 
-## Eigene Plätze ergänzen
-Datei `src/data/courses.json`, Liste `courses`. Pro Loch:
+## Plätze ergänzen
+Am einfachsten in der App unter **Plätze**. Format eines Platzes (z. B. für `src/data/seed.json`), pro Loch:
 ```json
-{ "number": 1, "par": 4, "hcp": 7,
-  "tee":   { "lat": 52.43, "lng": 13.18 },
+{ "par": 4, "si": 7, "len": "350", "note": "Wasser links",
   "green": { "front":  { "lat": 52.4331, "lng": 13.18 },
              "center": { "lat": 52.4332, "lng": 13.18 },
              "back":   { "lat": 52.4333, "lng": 13.18 } } }
 ```
 Koordinaten bekommst du z. B. in Google Maps (Satellit): Punkt lange drücken → Koordinaten kopieren.
-`placeholderCoordinates: true` entfernen, sobald echte Werte drin sind. Der mitgelieferte **Beispielplatz** hat nur
-Platzhalter-Koordinaten.
 
 ## Aufbau
-- `src/App.jsx` – Navigation und Rundenverwaltung
-- `src/components/` – Home (Statistik, Runden), NewRound, Play (Loch-Eingabe + GPS), RoundDetail (Scorekarte)
-- `src/lib/` – LocalStorage, GPS-Hook, Entfernung (Haversine), Statistik
+- `src/App.jsx` – Kopfzeile, Tabs, Startdaten, Einladungslink
+- `src/views/` – MyGolf (Runden + Statistik), Tournaments, Players, Courses, Settings
+- `src/components/` – HoleEntry (Loch-Eingabe + GPS), Stepper, Modal
+- `src/lib/` – cloud (Supabase + Offline-Warteschlange), golf (WHS-Rechnung, Leaderboard), stats, GPS-Hook, Entfernung
+- `supabase/setup.sql` – Tabelle, Zugriffsregeln mit Gruppen-Code, Startdaten
 
 ## Veröffentlichung (GitHub Pages)
 Der Workflow `.github/workflows/pages.yml` baut die App bei jedem Push auf `main` (Änderungen in `golf-pwa/`)
