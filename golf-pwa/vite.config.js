@@ -9,11 +9,11 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['icon.svg'],
+      includeAssets: ['icon.svg', 'logo-wannsee.png'],
       manifest: {
-        name: 'Golf – Scorecard & GPS',
-        short_name: 'Golf',
-        description: 'Persönliche Golf-App: Scorecard, GPS-Distanzen und Statistik',
+        name: 'B10 Golf',
+        short_name: 'B10 Golf',
+        description: 'B10 Golf: Turniere mit Brutto-/Nettowertung, Scorecard, GPS-Distanzen und Statistik',
         lang: 'de',
         theme_color: '#14532d',
         background_color: '#ffffff',

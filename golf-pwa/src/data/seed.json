@@ -1,0 +1,803 @@
+{
+ "players": {
+  "carsten-j": {
+   "createdAt": 1794842400000,
+   "hcp": 19.3,
+   "hole19": "",
+   "homeclub": "",
+   "id": "carsten-j",
+   "name": "Carsten J",
+   "sex": "m",
+   "updatedAt": 1794842400000
+  },
+  "carsten-k": {
+   "createdAt": 1794842400000,
+   "hcp": 8,
+   "hole19": "",
+   "homeclub": "",
+   "id": "carsten-k",
+   "name": "Carsten K",
+   "sex": "m",
+   "updatedAt": 1794842400000
+  },
+  "christian": {
+   "createdAt": 1794842400000,
+   "hcp": 23,
+   "hole19": "",
+   "homeclub": "",
+   "id": "christian",
+   "name": "Christian",
+   "sex": "m",
+   "updatedAt": 1794842400000
+  },
+  "ingo": {
+   "createdAt": 1794842400000,
+   "hcp": 17,
+   "hole19": "",
+   "homeclub": "",
+   "id": "ingo",
+   "name": "Ingo",
+   "sex": "m",
+   "updatedAt": 1794842400000
+  },
+  "joerg-l": {
+   "createdAt": 1794842400000,
+   "hcp": 15.3,
+   "hole19": "",
+   "homeclub": "",
+   "id": "joerg-l",
+   "name": "Jörg L",
+   "sex": "m",
+   "updatedAt": 1794842400000
+  },
+  "joerg-w": {
+   "createdAt": 1794842400000,
+   "hcp": 21.2,
+   "hole19": "",
+   "homeclub": "",
+   "id": "joerg-w",
+   "name": "Jörg W",
+   "sex": "m",
+   "updatedAt": 1794842400000
+  },
+  "josef": {
+   "createdAt": 1794842400000,
+   "hcp": 12,
+   "hole19": "",
+   "homeclub": "",
+   "id": "josef",
+   "name": "Josef",
+   "sex": "m",
+   "updatedAt": 1794842400000
+  },
+  "stefan": {
+   "createdAt": 1794842400000,
+   "hcp": 11,
+   "hole19": "",
+   "homeclub": "",
+   "id": "stefan",
+   "name": "Stefan",
+   "sex": "m",
+   "updatedAt": 1794842400000
+  },
+  "thilo": {
+   "createdAt": 1794842400000,
+   "hcp": 19.9,
+   "hole19": "",
+   "homeclub": "",
+   "id": "thilo",
+   "name": "Thilo",
+   "sex": "m",
+   "updatedAt": 1794842400000
+  },
+  "thomas": {
+   "createdAt": 1794842400000,
+   "hcp": 11,
+   "hole19": "",
+   "homeclub": "",
+   "id": "thomas",
+   "name": "Thomas",
+   "sex": "m",
+   "updatedAt": 1794842400000
+  }
+ },
+ "courses": {
+  "blacksearama": {
+   "createdAt": 1794843000000,
+   "holes": [
+    {
+     "len": "",
+     "note": "",
+     "par": 5,
+     "si": 12,
+     "green": null
+    },
+    {
+     "len": "",
+     "note": "",
+     "par": 4,
+     "si": 6,
+     "green": null
+    },
+    {
+     "len": "",
+     "note": "",
+     "par": 4,
+     "si": 18,
+     "green": null
+    },
+    {
+     "len": "",
+     "note": "",
+     "par": 4,
+     "si": 2,
+     "green": null
+    },
+    {
+     "len": "",
+     "note": "",
+     "par": 3,
+     "si": 16,
+     "green": null
+    },
+    {
+     "len": "",
+     "note": "",
+     "par": 4,
+     "si": 8,
+     "green": null
+    },
+    {
+     "len": "",
+     "note": "",
+     "par": 4,
+     "si": 4,
+     "green": null
+    },
+    {
+     "len": "",
+     "note": "",
+     "par": 3,
+     "si": 14,
+     "green": null
+    },
+    {
+     "len": "",
+     "note": "",
+     "par": 5,
+     "si": 10,
+     "green": null
+    },
+    {
+     "len": "",
+     "note": "",
+     "par": 4,
+     "si": 11,
+     "green": null
+    },
+    {
+     "len": "",
+     "note": "",
+     "par": 4,
+     "si": 9,
+     "green": null
+    },
+    {
+     "len": "",
+     "note": "",
+     "par": 5,
+     "si": 1,
+     "green": null
+    },
+    {
+     "len": "",
+     "note": "",
+     "par": 3,
+     "si": 13,
+     "green": null
+    },
+    {
+     "len": "",
+     "note": "",
+     "par": 4,
+     "si": 5,
+     "green": null
+    },
+    {
+     "len": "",
+     "note": "",
+     "par": 4,
+     "si": 17,
+     "green": null
+    },
+    {
+     "len": "",
+     "note": "",
+     "par": 4,
+     "si": 3,
+     "green": null
+    },
+    {
+     "len": "",
+     "note": "",
+     "par": 5,
+     "si": 15,
+     "green": null
+    },
+    {
+     "len": "",
+     "note": "",
+     "par": 3,
+     "si": 7,
+     "green": null
+    }
+   ],
+   "id": "blacksearama",
+   "location": "Balchik, Bulgarien",
+   "name": "BlackSeaRama",
+   "notes": "Gary-Player-Design mit Blick aufs Schwarze Meer. CR/Slope laut Online-Quellen uneinheitlich (Gold auch als 72,0/113 bzw. 72,2/126 angegeben): bitte mit der Scorecard vor Ort prüfen.",
+   "tees": [
+    {
+     "crM": "73.1",
+     "crW": "",
+     "name": "Gold",
+     "slopeM": "123",
+     "slopeW": ""
+    },
+    {
+     "crM": "70.7",
+     "crW": "",
+     "name": "Silber",
+     "slopeM": "121",
+     "slopeW": ""
+    },
+    {
+     "crM": "69.2",
+     "crW": "",
+     "name": "Weiß",
+     "slopeM": "117",
+     "slopeW": ""
+    },
+    {
+     "crM": "67.1",
+     "crW": "",
+     "name": "Grün",
+     "slopeM": "113",
+     "slopeW": ""
+    }
+   ],
+   "updatedAt": 1794843000000
+  },
+  "lighthouse": {
+   "createdAt": 1794843000000,
+   "holes": [
+    {
+     "len": "",
+     "note": "",
+     "par": 4,
+     "si": 5,
+     "green": null
+    },
+    {
+     "len": "",
+     "note": "",
+     "par": 4,
+     "si": 7,
+     "green": null
+    },
+    {
+     "len": "",
+     "note": "",
+     "par": 5,
+     "si": 13,
+     "green": null
+    },
+    {
+     "len": "",
+     "note": "",
+     "par": 4,
+     "si": 9,
+     "green": null
+    },
+    {
+     "len": "",
+     "note": "",
+     "par": 5,
+     "si": 3,
+     "green": null
+    },
+    {
+     "len": "",
+     "note": "",
+     "par": 3,
+     "si": 15,
+     "green": null
+    },
+    {
+     "len": "",
+     "note": "",
+     "par": 4,
+     "si": 11,
+     "green": null
+    },
+    {
+     "len": "",
+     "note": "",
+     "par": 3,
+     "si": 17,
+     "green": null
+    },
+    {
+     "len": "",
+     "note": "",
+     "par": 4,
+     "si": 1,
+     "green": null
+    },
+    {
+     "len": "",
+     "note": "",
+     "par": 4,
+     "si": 4,
+     "green": null
+    },
+    {
+     "len": "",
+     "note": "",
+     "par": 3,
+     "si": 6,
+     "green": null
+    },
+    {
+     "len": "",
+     "note": "",
+     "par": 5,
+     "si": 12,
+     "green": null
+    },
+    {
+     "len": "",
+     "note": "",
+     "par": 4,
+     "si": 18,
+     "green": null
+    },
+    {
+     "len": "",
+     "note": "",
+     "par": 3,
+     "si": 14,
+     "green": null
+    },
+    {
+     "len": "",
+     "note": "",
+     "par": 4,
+     "si": 8,
+     "green": null
+    },
+    {
+     "len": "",
+     "note": "",
+     "par": 5,
+     "si": 10,
+     "green": null
+    },
+    {
+     "len": "",
+     "note": "",
+     "par": 3,
+     "si": 16,
+     "green": null
+    },
+    {
+     "len": "",
+     "note": "",
+     "par": 4,
+     "si": 2,
+     "green": null
+    }
+   ],
+   "id": "lighthouse",
+   "location": "Balchik, Bulgarien",
+   "name": "Lighthouse",
+   "notes": "Ian-Woosnam-Design (2008), Par 71. CR/Slope laut Online-Quellen uneinheitlich (Resort-Angabe: CR 70 / Slope 128): bitte mit der Scorecard vor Ort prüfen.",
+   "tees": [
+    {
+     "crM": "70.0",
+     "crW": "",
+     "name": "Gelb",
+     "slopeM": "124",
+     "slopeW": ""
+    },
+    {
+     "crM": "73.6",
+     "crW": "",
+     "name": "Schwarz",
+     "slopeM": "128",
+     "slopeW": ""
+    },
+    {
+     "crM": "",
+     "crW": "71.4",
+     "name": "Rot",
+     "slopeM": "",
+     "slopeW": "121"
+    }
+   ],
+   "updatedAt": 1794843000000
+  },
+  "thracian-cliffs": {
+   "createdAt": 1794843000000,
+   "holes": [
+    {
+     "len": "",
+     "note": "",
+     "par": 4,
+     "si": 17,
+     "green": null
+    },
+    {
+     "len": "",
+     "note": "",
+     "par": 5,
+     "si": 1,
+     "green": null
+    },
+    {
+     "len": "",
+     "note": "",
+     "par": 5,
+     "si": 13,
+     "green": null
+    },
+    {
+     "len": "",
+     "note": "",
+     "par": 4,
+     "si": 9,
+     "green": null
+    },
+    {
+     "len": "",
+     "note": "",
+     "par": 3,
+     "si": 7,
+     "green": null
+    },
+    {
+     "len": "",
+     "note": "",
+     "par": 3,
+     "si": 5,
+     "green": null
+    },
+    {
+     "len": "",
+     "note": "",
+     "par": 4,
+     "si": 3,
+     "green": null
+    },
+    {
+     "len": "",
+     "note": "",
+     "par": 4,
+     "si": 15,
+     "green": null
+    },
+    {
+     "len": "",
+     "note": "",
+     "par": 4,
+     "si": 11,
+     "green": null
+    },
+    {
+     "len": "",
+     "note": "",
+     "par": 5,
+     "si": 6,
+     "green": null
+    },
+    {
+     "len": "",
+     "note": "",
+     "par": 4,
+     "si": 4,
+     "green": null
+    },
+    {
+     "len": "",
+     "note": "",
+     "par": 4,
+     "si": 12,
+     "green": null
+    },
+    {
+     "len": "",
+     "note": "",
+     "par": 4,
+     "si": 14,
+     "green": null
+    },
+    {
+     "len": "",
+     "note": "",
+     "par": 5,
+     "si": 8,
+     "green": null
+    },
+    {
+     "len": "",
+     "note": "",
+     "par": 3,
+     "si": 18,
+     "green": null
+    },
+    {
+     "len": "",
+     "note": "",
+     "par": 4,
+     "si": 2,
+     "green": null
+    },
+    {
+     "len": "",
+     "note": "",
+     "par": 4,
+     "si": 10,
+     "green": null
+    },
+    {
+     "len": "",
+     "note": "",
+     "par": 3,
+     "si": 16,
+     "green": null
+    }
+   ],
+   "id": "thracian-cliffs",
+   "location": "Kavarna, Bulgarien",
+   "name": "Thracian Cliffs",
+   "notes": "Gary-Player-Design direkt auf den Klippen am Schwarzen Meer – Wind beachten. CR/Slope und HCP-Reihenfolge der Löcher 13–15 und 18 laut Online-Quellen uneinheitlich: bitte mit der Scorecard vor Ort prüfen.",
+   "tees": [
+    {
+     "crM": "75.3",
+     "crW": "",
+     "name": "Schwarz",
+     "slopeM": "145",
+     "slopeW": ""
+    },
+    {
+     "crM": "72.4",
+     "crW": "",
+     "name": "Gold",
+     "slopeM": "136",
+     "slopeW": ""
+    },
+    {
+     "crM": "71.2",
+     "crW": "75.3",
+     "name": "Silber",
+     "slopeM": "132",
+     "slopeW": "138"
+    },
+    {
+     "crM": "68.1",
+     "crW": "72.4",
+     "name": "Weiß",
+     "slopeM": "122",
+     "slopeW": "128"
+    },
+    {
+     "crM": "63.4",
+     "crW": "68.4",
+     "name": "Grün",
+     "slopeM": "111",
+     "slopeW": "120"
+    }
+   ],
+   "updatedAt": 1794843000000
+  },
+  "glc-wannsee": {
+   "id": "glc-wannsee",
+   "name": "GLC Berlin-Wannsee",
+   "location": "Berlin-Wannsee",
+   "home": true,
+   "notes": "Par und HCP laut Online-Scorecards; Course Rating/Slope dort uneinheitlich – bitte mit der Club-Scorecard prüfen.",
+   "holes": [
+    {
+     "par": 4,
+     "si": 5,
+     "len": "",
+     "note": "",
+     "green": null
+    },
+    {
+     "par": 4,
+     "si": 3,
+     "len": "",
+     "note": "",
+     "green": null
+    },
+    {
+     "par": 4,
+     "si": 11,
+     "len": "",
+     "note": "",
+     "green": null
+    },
+    {
+     "par": 5,
+     "si": 17,
+     "len": "",
+     "note": "",
+     "green": null
+    },
+    {
+     "par": 4,
+     "si": 7,
+     "len": "",
+     "note": "",
+     "green": null
+    },
+    {
+     "par": 4,
+     "si": 9,
+     "len": "",
+     "note": "",
+     "green": null
+    },
+    {
+     "par": 4,
+     "si": 1,
+     "len": "",
+     "note": "",
+     "green": null
+    },
+    {
+     "par": 3,
+     "si": 15,
+     "len": "",
+     "note": "",
+     "green": null
+    },
+    {
+     "par": 5,
+     "si": 13,
+     "len": "",
+     "note": "",
+     "green": null
+    },
+    {
+     "par": 3,
+     "si": 12,
+     "len": "",
+     "note": "",
+     "green": null
+    },
+    {
+     "par": 5,
+     "si": 2,
+     "len": "",
+     "note": "",
+     "green": null
+    },
+    {
+     "par": 4,
+     "si": 8,
+     "len": "",
+     "note": "",
+     "green": null
+    },
+    {
+     "par": 4,
+     "si": 16,
+     "len": "",
+     "note": "",
+     "green": null
+    },
+    {
+     "par": 3,
+     "si": 14,
+     "len": "",
+     "note": "",
+     "green": null
+    },
+    {
+     "par": 5,
+     "si": 6,
+     "len": "",
+     "note": "",
+     "green": null
+    },
+    {
+     "par": 4,
+     "si": 18,
+     "len": "",
+     "note": "",
+     "green": null
+    },
+    {
+     "par": 3,
+     "si": 10,
+     "len": "",
+     "note": "",
+     "green": null
+    },
+    {
+     "par": 4,
+     "si": 4,
+     "len": "",
+     "note": "",
+     "green": null
+    }
+   ],
+   "tees": [
+    {
+     "name": "Weiß",
+     "crM": "72.9",
+     "slopeM": "134",
+     "crW": "",
+     "slopeW": ""
+    },
+    {
+     "name": "Gelb",
+     "crM": "71.9",
+     "slopeM": "133",
+     "crW": "",
+     "slopeW": ""
+    }
+   ],
+   "createdAt": 1794850000000,
+   "updatedAt": 1794850000000
+  }
+ },
+ "tournaments": {
+  "b10-bulgarien": {
+   "allowance": 95,
+   "countBest": 0,
+   "createdAt": 1794843100000,
+   "format": "stableford",
+   "hcp": {},
+   "id": "b10-bulgarien",
+   "maxScore": "none",
+   "name": "B10 Bulgarien",
+   "playerIds": [
+    "carsten-j",
+    "joerg-w",
+    "thilo",
+    "joerg-l",
+    "ingo",
+    "christian",
+    "thomas",
+    "stefan",
+    "josef",
+    "carsten-k"
+   ],
+   "rounds": [
+    {
+     "courseId": "thracian-cliffs",
+     "date": "",
+     "id": "r-thracian",
+     "tee": "Silber"
+    },
+    {
+     "courseId": "lighthouse",
+     "date": "",
+     "id": "r-lighthouse",
+     "tee": "Gelb"
+    },
+    {
+     "courseId": "blacksearama",
+     "date": "",
+     "id": "r-blacksearama",
+     "tee": "Silber"
+    }
+   ],
+   "updatedAt": 1794843500000
+  }
+ },
+ "scores": {}
+}
