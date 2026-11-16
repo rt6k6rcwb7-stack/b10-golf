@@ -1,0 +1,16 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html { -webkit-tap-highlight-color: transparent; }
+  body { padding-top: env(safe-area-inset-top); padding-bottom: env(safe-area-inset-bottom); }
+  button { touch-action: manipulation; }
+  :focus-visible { outline: 3px solid #f59e0b; outline-offset: 2px; }
+}
+@layer components {
+  .btn { @apply rounded-2xl border-2 border-neutral-900 bg-white px-4 py-3 text-lg font-bold text-neutral-950 active:scale-[0.98] active:bg-neutral-100 disabled:opacity-40; }
+  .btn-primary { @apply rounded-2xl border-2 border-turf-900 bg-turf-900 px-4 py-3 text-lg font-bold text-white active:scale-[0.98] active:bg-turf-800 disabled:opacity-40; }
+  .label { @apply text-xs font-bold uppercase tracking-widest text-neutral-600; }
+  .tnum { font-variant-numeric: tabular-nums; }
+}
