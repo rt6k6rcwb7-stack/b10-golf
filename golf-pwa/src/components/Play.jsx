@@ -12,8 +12,10 @@ function scoreStyle(strokes, par) {
   return 'border-neutral-900 bg-neutral-900 text-white';
 }
 
-function Distances({ hole, geo, gpsOn, setGpsOn }) {
-  const g = hole.green || {};
+function Distances({ hole, green, geo, gpsOn, setGpsOn, onMeasure }) {
+  const [measuring, setMeasuring] = useState(false);
+  const g = green || {};
+  const hasGreen = !!(g.front || g.center || g.back);
   const d = (pt) => (geo.pos && pt ? Math.round(distanceMeters(geo.pos, pt)) : null);
   const cells = [
     { k: 'Anfang', v: d(g.front) },
@@ -48,11 +50,39 @@ function Distances({ hole, geo, gpsOn, setGpsOn }) {
             ? `Genauigkeit ± ${Math.round(geo.accuracy)} m`
             : 'Suche GPS-Signal …'}
       </div>
+      {!hasGreen && !measuring && (
+        <div className="mt-2 rounded-xl bg-white/10 p-2 text-center text-sm">
+          Für dieses Loch sind noch keine Grün-Punkte gespeichert. Auf dem Grün einmal einmessen – danach stimmen die Distanzen.
+        </div>
+      )}
+      {measuring ? (
+        <div className="mt-3 flex flex-col gap-2 rounded-xl bg-white p-3 text-neutral-950">
+          <div className="text-sm font-bold">Stell dich auf den Punkt und tippe:</div>
+          <div className="grid grid-cols-3 gap-2">
+            {[['front', 'Anfang'], ['center', 'Mitte'], ['back', 'Ende']].map(([k, t]) => (
+              <button
+                key={k}
+                className={`h-14 rounded-xl border-2 text-base font-black ${g[k] ? 'border-turf-900 bg-turf-100' : 'border-neutral-900'}`}
+                disabled={!geo.pos}
+                onClick={() => onMeasure(hole.number, k, { lat: +geo.pos.lat.toFixed(6), lng: +geo.pos.lng.toFixed(6) })}
+              >
+                {g[k] ? '✓ ' : ''}{t} hier
+              </button>
+            ))}
+          </div>
+          {geo.accuracy > 15 && <div className="text-sm font-bold text-amber-800">GPS noch ungenau (± {Math.round(geo.accuracy)} m) – kurz warten.</div>}
+          <button className="text-sm font-bold underline" onClick={() => setMeasuring(false)}>Fertig</button>
+        </div>
+      ) : (
+        <button className="mt-2 w-full text-center text-sm font-bold text-turf-100 underline" onClick={() => setMeasuring(true)}>
+          📍 Grün einmessen
+        </button>
+      )}
     </div>
   );
 }
 
-export default function Play({ round, onUpdateHole, onFinish, onExit, gpsOn, setGpsOn }) {
+export default function Play({ round, onUpdateHole, onFinish, onExit, gpsOn, setGpsOn, greenFor, onMeasure }) {
   const [idx, setIdx] = useState(() => {
     const firstOpen = round.holes.findIndex((h) => !(h.strokes > 0));
     return firstOpen === -1 ? 0 : firstOpen;
@@ -104,7 +134,7 @@ export default function Play({ round, onUpdateHole, onFinish, onExit, gpsOn, set
           </div>
         </div>
 
-        <Distances hole={hole} geo={geo} gpsOn={gpsOn} setGpsOn={setGpsOn} />
+        <Distances hole={hole} green={greenFor(hole)} geo={geo} gpsOn={gpsOn} setGpsOn={setGpsOn} onMeasure={onMeasure} />
 
         <Stepper
           label="Schläge"
