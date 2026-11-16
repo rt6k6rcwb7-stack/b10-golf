@@ -37,3 +37,9 @@ Platzhalter-Koordinaten.
 - `src/App.jsx` – Navigation und Rundenverwaltung
 - `src/components/` – Home (Statistik, Runden), NewRound, Play (Loch-Eingabe + GPS), RoundDetail (Scorekarte)
 - `src/lib/` – LocalStorage, GPS-Hook, Entfernung (Haversine), Statistik
+
+## Veröffentlichung (GitHub Pages)
+Der Workflow `.github/workflows/pages.yml` baut die App bei jedem Push auf `main` (Änderungen in `golf-pwa/`)
+und veröffentlicht sie unter `https://rt6k6rcwb7-stack.github.io/b10-golf/`.
+Einmalig nötig: Repository → *Settings* → *Pages* → *Build and deployment* → Source **GitHub Actions**.
+Manuell starten: *Actions* → „Golf-PWA auf GitHub Pages“ → *Run workflow*.
