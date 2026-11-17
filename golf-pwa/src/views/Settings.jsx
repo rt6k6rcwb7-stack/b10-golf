@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import Modal, { Field, inputCls } from '../components/Modal.jsx';
-import { inviteLink, isStandalone, parseInvite, testConfig } from '../lib/cloud.js';
+import { hasBuiltinServer, inviteLink, isStandalone, parseInvite, testConfig, withDefaults } from '../lib/cloud.js';
 
 export default function Settings({ S, shared, me, setMe, onClose }) {
   const { cfg, connect, status, sync } = shared;
   const [f, setF] = useState(() => cfg || { url: '', key: '', code: '' });
   const [invite, setInvite] = useState('');
+  const [groupCode, setGroupCode] = useState('');
+  const [showInvite, setShowInvite] = useState(!hasBuiltinServer);
   const [manual, setManual] = useState(false);
   const [msg, setMsg] = useState(null);
   const [link, setLink] = useState(null);
@@ -19,6 +21,20 @@ export default function Settings({ S, shared, me, setMe, onClose }) {
       setMsg('Verbunden.');
     } catch (e) {
       setMsg(e.status === 401 || e.status === 403 || e.status === 404 ? 'Abgelehnt – Adresse, Schlüssel oder Tabelle prüfen.' : 'Keine Verbindung – Internet prüfen oder später erneut versuchen.');
+    }
+  }
+  // Nur Gruppen-Code: Server ist in der App hinterlegt. Ein falscher Code liefert leere Daten –
+  // deshalb prüfen, ob die Gruppe Spieler hat.
+  async function connectCode() {
+    const c = withDefaults({ code: groupCode });
+    setMsg('Prüfe Gruppen-Code …');
+    try {
+      const rows = await testConfig(c);
+      if (!rows || !rows.length) { setMsg('Gruppen-Code falsch – bitte genau so eingeben, wie ihn die B10 bekommen hat (Groß-/Kleinschreibung).'); return; }
+      connect(c);
+      setMsg('Verbunden.');
+    } catch {
+      setMsg('Keine Verbindung – Internet prüfen oder später erneut versuchen.');
     }
   }
   function connectInvite(text) {
@@ -69,9 +85,9 @@ export default function Settings({ S, shared, me, setMe, onClose }) {
         <div className="flex flex-col gap-2">
           <button className="btn-primary" onClick={share}>Einladung an Freunde senden</button>
           <button className="btn" onClick={copyLink}>Einladungslink kopieren</button>
-          {link === 'kopiert' && <div className="text-sm font-bold text-turf-800">Kopiert. Zum Einfügen in der App vom Home-Bildschirm: ⚙︎ → „Einladung einfügen“.</div>}
+          {link === 'kopiert' && <div className="text-sm font-bold text-turf-800">Kopiert.</div>}
           {link && link !== 'kopiert' && <textarea readOnly className={`${inputCls} h-24 font-mono text-xs`} value={link} onFocus={(e) => e.target.select()} />}
-          <p className="text-sm text-neutral-600">Die Einladung enthält den Gruppen-Code – nur an die B10 schicken.</p>
+          <p className="text-sm text-neutral-600">Die Einladung enthält den Gruppen-Code – nur an die B10 schicken.{hasBuiltinServer ? ` Alternativ einfach den Code weitergeben: ${cfg.code}` : ''}</p>
           <button className="btn" onClick={sync}>Jetzt abgleichen</button>
           <button className="text-sm font-bold text-red-700 underline" onClick={() => { connect(null); setF({ url: '', key: '', code: '' }); setMsg(null); }}>Verbindung auf diesem Gerät trennen</button>
         </div>
@@ -79,9 +95,23 @@ export default function Settings({ S, shared, me, setMe, onClose }) {
         <div className="flex flex-col gap-2">
           {isStandalone() && (
             <p className="rounded-xl bg-amber-100 p-3 text-sm text-amber-950">
-              Die App auf dem Home-Bildschirm hat ihren eigenen Speicher. Einmal die Einladung einfügen – dann bleibt sie verbunden.
+              Die App auf dem Home-Bildschirm hat ihren eigenen Speicher. Einmal verbinden – dann bleibt sie verbunden.
             </p>
           )}
+          {hasBuiltinServer && (
+            <>
+              <Field label="Gruppen-Code">
+                <input className={`${inputCls} text-lg`} value={groupCode} onChange={(e) => setGroupCode(e.target.value)}
+                  autoCapitalize="off" autoCorrect="off" spellCheck={false} placeholder="z. B. B10-…" />
+              </Field>
+              <button className="btn-primary" disabled={groupCode.trim().length < 4} onClick={connectCode}>Verbinden</button>
+              {msg && <div className="text-sm font-bold">{msg}</div>}
+              <button className="self-start text-sm font-bold text-turf-800 underline" onClick={() => setShowInvite(!showInvite)}>
+                {showInvite ? 'Einladung ausblenden' : 'Stattdessen Einladungslink einfügen'}
+              </button>
+            </>
+          )}
+          {showInvite && (<>
           <Field label="Einladung einfügen (Link oder Code)">
             <textarea className={`${inputCls} h-24 font-mono text-xs`} value={invite} onChange={(e) => setInvite(e.target.value)}
               placeholder="https://…/b10-golf/#setup=…" />
@@ -90,7 +120,8 @@ export default function Settings({ S, shared, me, setMe, onClose }) {
             <button className="btn" onClick={pasteInvite}>Aus Zwischenablage</button>
             <button className="btn-primary" disabled={!invite.trim()} onClick={() => connectInvite(invite)}>Verbinden</button>
           </div>
-          {msg && <div className="text-sm font-bold">{msg}</div>}
+          {msg && !hasBuiltinServer && <div className="text-sm font-bold">{msg}</div>}
+          </>)}
           <button className="self-start text-sm font-bold text-turf-800 underline" onClick={() => setManual(!manual)}>
             {manual ? 'Manuelle Eingabe ausblenden' : 'Ohne Einladung: Supabase-Daten manuell eintragen'}
           </button>
