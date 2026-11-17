@@ -33,7 +33,7 @@ function tournamentRoundsOf(S, me) {
   }).filter(Boolean);
 }
 
-export default function MyGolf({ S, save, me }) {
+export default function MyGolf({ S, save, me, imgs }) {
   const [rounds, setRounds] = useState(() => read(ROUNDS_KEY, []));
   const [activeId, setActiveId] = useState(() => read(ACTIVE_KEY, null));
   const [view, setView] = useState(() => (read(ACTIVE_KEY, null) ? 'play' : 'home'));
@@ -84,6 +84,7 @@ export default function MyGolf({ S, save, me }) {
         </div>
         <HoleEntry holes={holes} values={values} onSet={updateHole} startIdx={first === -1 ? 0 : first}
           onMeasure={c ? (i, w, p) => measure(active, i, w, p) : null}
+          imageFor={(i) => imgs?.imageFor(active.courseId, active.holes[i].number)}
           footer={<button className="btn-primary py-4" onClick={() => {
             setRounds((rs) => rs.map((r) => (r.id === activeId ? { ...r, finished: true, finishedAt: Date.now() } : r)));
             setDetailId(activeId); setActiveId(null); setView('detail');
@@ -142,7 +143,7 @@ export default function MyGolf({ S, save, me }) {
     <div className="flex flex-col gap-5 p-4">
       <header className="flex items-end justify-between gap-3">
         <div><div className="label">Persönlich</div><h1 className="text-4xl font-black tracking-tight">Meine Runden</h1></div>
-        <button className="btn-primary" onClick={() => setNewOpen(true)}>+ Runde</button>
+        <button className="btn-primary shrink-0 whitespace-nowrap" onClick={() => setNewOpen(true)}>+ Runde</button>
       </header>
 
       {active && (

@@ -17,27 +17,54 @@ const write = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } ca
 
 export const loadConfig = () => read(CFG_KEY, null);
 export const saveConfig = (c) => (c ? write(CFG_KEY, c) : localStorage.removeItem(CFG_KEY));
-const enabled = (c) => !!(c && c.url && c.key && c.code);
+export const enabled = (c) => !!(c && c.url && c.key && c.code);
 
-// Einladungslink: …/#setup=<base64(JSON)> richtet die Verbindung mit einem Tipp ein.
-export function readSetupFromHash() {
-  const m = location.hash.match(/^#setup=(.+)$/);
-  if (!m) return null;
+// Einladung: Link …/#setup=<code> oder nur der <code>.
+// Der Code ist base64url ohne "="-Auffüllung – Messenger (WhatsApp usw.) schneiden sonst das Linkende ab.
+const toB64Url = (str) => btoa(unescape(encodeURIComponent(str))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+function fromB64Url(code) {
+  let b = code.replace(/\s+/g, '').replace(/-/g, '+').replace(/_/g, '/');
+  while (b.length % 4) b += '=';
+  return decodeURIComponent(escape(atob(b)));
+}
+
+// Akzeptiert den ganzen Link, nur den Code, auch wenn ein Messenger Zeichen kodiert oder Text drumherum steht
+export function parseInvite(text) {
+  if (!text) return null;
+  // Zuerst wie eingefügt, dann ohne Leerzeichen/Zeilenumbrüche (Messenger brechen lange Codes um)
+  return parseInviteOnce(text) || parseInviteOnce(String(text).replace(/\s+/g, ''));
+}
+function parseInviteOnce(text) {
+  let t = String(text).trim();
+  try { t = decodeURIComponent(t); } catch { /* bleibt */ }
+  const m = t.match(/setup=([A-Za-z0-9+/_=-]+)/);
+  const code = m ? m[1] : t.match(/^[A-Za-z0-9+/_=-]{20,}$/) ? t : null;
+  if (!code) return null;
   try {
-    const cfg = JSON.parse(decodeURIComponent(escape(atob(m[1]))));
-    history.replaceState(null, '', location.pathname + location.search);
-    return enabled(cfg) ? cfg : null;
+    const cfg = JSON.parse(fromB64Url(code.replace(/=+$/, '')));
+    return enabled(cfg) ? { url: cfg.url, key: cfg.key, code: cfg.code } : null;
   } catch {
     return null;
   }
 }
-export function inviteLink(cfg) {
-  const b64 = btoa(unescape(encodeURIComponent(JSON.stringify({ url: cfg.url, key: cfg.key, code: cfg.code }))));
-  return `${location.origin}${location.pathname}#setup=${b64}`;
-}
 
-function api(cfg, path, opts = {}) {
-  return fetch(`${cfg.url.replace(/\/$/, '')}/rest/v1/${path}`, {
+export function readSetupFromHash() {
+  if (!location.hash.includes('setup=')) return null;
+  const cfg = parseInvite(location.hash);
+  history.replaceState(null, '', location.pathname + location.search);
+  return cfg;
+}
+export const inviteCode = (cfg) => toB64Url(JSON.stringify({ url: cfg.url, key: cfg.key, code: cfg.code }));
+export const inviteLink = (cfg) => `${location.origin}${location.pathname}#setup=${inviteCode(cfg)}`;
+
+// Läuft die App vom Home-Bildschirm (eigener Speicher, startet immer ohne Einladung)?
+export const isStandalone = () => window.navigator.standalone === true || window.matchMedia?.('(display-mode: standalone)').matches;
+
+// Adresse vereinheitlichen: angehängtes /rest/v1 und Schrägstriche entfernen
+export const baseUrl = (url) => String(url || '').trim().replace(/\/+$/, '').replace(/\/rest\/v1$/, '').replace(/\/+$/, '');
+
+export function api(cfg, path, opts = {}) {
+  return fetch(`${baseUrl(cfg.url)}/rest/v1/${path}`, {
     ...opts,
     headers: {
       apikey: cfg.key,
@@ -63,7 +90,7 @@ export async function testConfig(cfg) {
 }
 
 async function pullAll(cfg) {
-  const rows = await api(cfg, 'docs?select=collection,id,data');
+  const rows = await api(cfg, 'docs?select=collection,id,data&collection=neq.holeimages');
   const out = Object.fromEntries(COLLECTIONS.map((c) => [c, {}]));
   for (const r of rows || []) if (out[r.collection]) out[r.collection][r.id] = r.data;
   return out;

@@ -10,7 +10,7 @@ export default function Modal({ title, onClose, children }) {
   return (
     <div className="fixed inset-0 z-40 flex items-end justify-center bg-black/50 sm:items-center" onClick={(e) => e.target === e.currentTarget && onClose()}>
       <div role="dialog" aria-modal="true" aria-label={title}
-        className="flex max-h-[92vh] w-full max-w-xl flex-col gap-4 overflow-y-auto rounded-t-3xl bg-white p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] sm:rounded-3xl">
+        className="flex max-h-[92vh] w-full max-w-xl flex-col gap-4 overflow-y-auto [&>*]:shrink-0 rounded-t-3xl bg-white p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] sm:rounded-3xl">
         <div className="flex items-center justify-between gap-2">
           <h2 className="text-2xl font-black">{title}</h2>
           <button className="px-2 text-3xl leading-none text-neutral-500" onClick={onClose} aria-label="Schließen">×</button>

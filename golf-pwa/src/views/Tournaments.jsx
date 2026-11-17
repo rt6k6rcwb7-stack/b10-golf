@@ -16,7 +16,7 @@ function Mark({ g, par }) {
   return <span className={`inline-grid h-7 min-w-7 place-items-center ${c}`}>{g}</span>;
 }
 
-export default function Tournaments({ S, save, remove, me }) {
+export default function Tournaments({ S, save, remove, me, imgs }) {
   const [openId, setOpenId] = useState(null);
   const [mode, setMode] = useState('netto');
   const [scope, setScope] = useState('all');
@@ -44,7 +44,7 @@ export default function Tournaments({ S, save, remove, me }) {
       <div className="flex flex-col gap-4 p-4">
         <header className="flex items-end justify-between gap-3">
           <div><div className="label">B10 Golffreunde</div><h1 className="text-4xl font-black tracking-tight">Turniere</h1></div>
-          <button className="btn-primary" onClick={() => setSettings('new')}>+ Turnier</button>
+          <button className="btn-primary shrink-0 whitespace-nowrap" onClick={() => setSettings('new')}>+ Turnier</button>
         </header>
         {!list.length && (
           <p className="rounded-2xl border-2 border-dashed border-neutral-300 p-4 text-neutral-600">
@@ -142,6 +142,7 @@ export default function Tournaments({ S, save, remove, me }) {
               values={{ strokes: sc.strokes || [], putts: sc.putts || [], fairway: sc.fairway || [] }}
               startIdx={Math.max(0, (sc.strokes || []).findIndex((x) => !(x > 0)))}
               onSet={setHole}
+              imageFor={(i) => imgs?.imageFor(c.id, i + 1)}
               onMeasure={(i, which, pos) => save('courses', c.id, { ...c, holes: c.holes.map((h, j) => (j === i ? { ...h, green: { ...(h.green || {}), [which]: pos } } : h)) })}
               footer={<button className="btn-primary py-4" onClick={() => setCard(null)}>Fertig</button>} />
             {importOpen && <ImportModal n={holes.length} player={p} onClose={() => setImportOpen(false)}
