@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { readSetupFromHash, useShared } from './lib/cloud.js';
+import { isStandalone, readSetupFromHash, useShared } from './lib/cloud.js';
 import { useHoleImages } from './lib/holeImages.js';
 import seedData from './data/seed.json';
 import MyGolf from './views/MyGolf.jsx';
@@ -73,9 +73,9 @@ export default function App() {
         </button>
       </header>
 
-      {!cfg && tab !== 'runden' && (
+      {!cfg && (tab !== 'runden' || isStandalone()) && (
         <button className="m-4 mb-0 rounded-2xl bg-amber-100 p-3 text-left text-sm text-amber-950" onClick={() => setSettingsOpen(true)}>
-          <b>Nicht mit der B10-Gruppe verbunden.</b> Änderungen sieht nur dieses Gerät. Tippen, um zu verbinden.
+          <b>Nicht mit der B10-Gruppe verbunden.</b> Änderungen sieht nur dieses Gerät. Tippen und die Einladung einfügen.
         </button>
       )}
 

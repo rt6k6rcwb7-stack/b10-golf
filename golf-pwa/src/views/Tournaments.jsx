@@ -44,7 +44,7 @@ export default function Tournaments({ S, save, remove, me, imgs }) {
       <div className="flex flex-col gap-4 p-4">
         <header className="flex items-end justify-between gap-3">
           <div><div className="label">B10 Golffreunde</div><h1 className="text-4xl font-black tracking-tight">Turniere</h1></div>
-          <button className="btn-primary" onClick={() => setSettings('new')}>+ Turnier</button>
+          <button className="btn-primary shrink-0 whitespace-nowrap" onClick={() => setSettings('new')}>+ Turnier</button>
         </header>
         {!list.length && (
           <p className="rounded-2xl border-2 border-dashed border-neutral-300 p-4 text-neutral-600">

@@ -143,7 +143,7 @@ export default function MyGolf({ S, save, me, imgs }) {
     <div className="flex flex-col gap-5 p-4">
       <header className="flex items-end justify-between gap-3">
         <div><div className="label">Persönlich</div><h1 className="text-4xl font-black tracking-tight">Meine Runden</h1></div>
-        <button className="btn-primary" onClick={() => setNewOpen(true)}>+ Runde</button>
+        <button className="btn-primary shrink-0 whitespace-nowrap" onClick={() => setNewOpen(true)}>+ Runde</button>
       </header>
 
       {active && (

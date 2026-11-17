@@ -12,7 +12,7 @@ export default function Courses({ S, save, remove, imgs }) {
     <div className="flex flex-col gap-4 p-4">
       <header className="flex items-end justify-between gap-3">
         <div><div className="label">Spielorte</div><h1 className="text-4xl font-black tracking-tight">Plätze</h1></div>
-        <button className="btn-primary" onClick={() => setEdit('new')}>+ Platz</button>
+        <button className="btn-primary shrink-0 whitespace-nowrap" onClick={() => setEdit('new')}>+ Platz</button>
       </header>
       <ul className="flex flex-col divide-y-2 divide-neutral-100 border-y-2 border-neutral-100">
         {list.map((c) => {

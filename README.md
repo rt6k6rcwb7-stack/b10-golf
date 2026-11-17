@@ -18,7 +18,13 @@ Spieler, Plätze, Turniere und Scorekarten liegen in einer kostenlosen Supabase-
 1. https://supabase.com → kostenloses Konto → **New project** (Region Frankfurt, Passwort egal merken).
 2. **SQL Editor** → Inhalt von [`golf-pwa/supabase/setup.sql`](golf-pwa/supabase/setup.sql) einfügen, `GRUPPEN-CODE` durch einen eigenen Code ersetzen → **Run**.
 3. **Project Settings → API**: *Project URL* und *anon public key* kopieren.
-4. In der App: ⚙︎ oben rechts → URL, Key und Gruppen-Code eintragen → **Verbinden** → **Einladungslink kopieren** und an die B10 schicken.
+4. In der App: ⚙︎ oben rechts → „Ohne Einladung: Supabase-Daten manuell eintragen“ → URL, Key und Gruppen-Code → **Verbinden**.
+5. ⚙︎ → **Einladung an Freunde senden** (öffnet das Teilen-Menü, z. B. WhatsApp).
+
+## Auf dem iPhone installieren
+1. Einladungslink in Safari öffnen (oder die App-Adresse) → Teilen → **Zum Home-Bildschirm**.
+2. Die App vom Home-Bildschirm starten. Sie hat ihren **eigenen Speicher** – deshalb einmal ⚙︎ → **Einladung einfügen**
+   (Link vorher kopieren, dann „Aus Zwischenablage“) → verbunden. Danach bleibt sie verbunden.
 
 Der Gruppen-Code steht nur im Einladungslink und in der Datenbank – nie im Repository.
 
