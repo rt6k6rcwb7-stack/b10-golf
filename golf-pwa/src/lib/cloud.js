@@ -4,6 +4,7 @@
 // Änderungen landen sofort lokal und werden im Hintergrund hochgeladen
 // (auch wenn auf dem Platz gerade kein Netz ist).
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { SUPABASE_ANON_KEY, SUPABASE_URL } from '../config.js';
 
 export const COLLECTIONS = ['players', 'courses', 'tournaments', 'scores'];
 const CFG_KEY = 'golf.cloud.v1';
@@ -15,8 +16,12 @@ const POLL_MS = 15000;
 const read = (k, d) => { try { const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch { return d; } };
 const write = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch { /* Speicher voll */ } };
 
-export const loadConfig = () => read(CFG_KEY, null);
-export const saveConfig = (c) => (c ? write(CFG_KEY, c) : localStorage.removeItem(CFG_KEY));
+// Adresse/Schlüssel sind in der App hinterlegt – pro Gerät wird nur der Gruppen-Code gespeichert
+export const hasBuiltinServer = !!(SUPABASE_URL && SUPABASE_ANON_KEY);
+export const withDefaults = (c) => (c && c.code ? { url: c.url || SUPABASE_URL, key: c.key || SUPABASE_ANON_KEY, code: String(c.code).trim() } : null);
+const isDefault = (c) => baseUrl(c.url) === baseUrl(SUPABASE_URL) && c.key === SUPABASE_ANON_KEY;
+export const loadConfig = () => withDefaults(read(CFG_KEY, null));
+export const saveConfig = (c) => (c ? write(CFG_KEY, isDefault(c) ? { code: c.code } : c) : localStorage.removeItem(CFG_KEY));
 export const enabled = (c) => !!(c && c.url && c.key && c.code);
 
 // Einladung: Link …/#setup=<code> oder nur der <code>.
@@ -38,11 +43,11 @@ function parseInviteOnce(text) {
   let t = String(text).trim();
   try { t = decodeURIComponent(t); } catch { /* bleibt */ }
   const m = t.match(/setup=([A-Za-z0-9+/_=-]+)/);
-  const code = m ? m[1] : t.match(/^[A-Za-z0-9+/_=-]{20,}$/) ? t : null;
+  const code = m ? m[1] : t.match(/^[A-Za-z0-9+/_=-]{8,}$/) ? t : null;
   if (!code) return null;
   try {
-    const cfg = JSON.parse(fromB64Url(code.replace(/=+$/, '')));
-    return enabled(cfg) ? { url: cfg.url, key: cfg.key, code: cfg.code } : null;
+    const cfg = withDefaults(JSON.parse(fromB64Url(code.replace(/=+$/, ''))));
+    return enabled(cfg) ? cfg : null;
   } catch {
     return null;
   }
@@ -54,7 +59,7 @@ export function readSetupFromHash() {
   history.replaceState(null, '', location.pathname + location.search);
   return cfg;
 }
-export const inviteCode = (cfg) => toB64Url(JSON.stringify({ url: cfg.url, key: cfg.key, code: cfg.code }));
+export const inviteCode = (cfg) => toB64Url(JSON.stringify(isDefault(cfg) ? { code: cfg.code } : { url: cfg.url, key: cfg.key, code: cfg.code }));
 export const inviteLink = (cfg) => `${location.origin}${location.pathname}#setup=${inviteCode(cfg)}`;
 
 // Läuft die App vom Home-Bildschirm (eigener Speicher, startet immer ohne Einladung)?
@@ -86,7 +91,7 @@ export function api(cfg, path, opts = {}) {
 // Verbindung prüfen: Lesen muss gehen; mit falschem Gruppen-Code liefert die Tabelle nichts.
 export async function testConfig(cfg) {
   const rows = await api(cfg, 'docs?select=id&collection=eq.players&limit=1');
-  return Array.isArray(rows);
+  return Array.isArray(rows) ? rows : null; // [] = Code falsch oder Gruppe noch leer
 }
 
 async function pullAll(cfg) {
@@ -189,7 +194,8 @@ export function useShared() {
     });
   }, []);
 
-  const connect = useCallback((c) => {
+  const connect = useCallback((raw) => {
+    const c = raw ? withDefaults(raw) : null;
     // Bisher nur lokal erfasste Daten beim ersten Verbinden mit hochladen
     if (c && !enabled(cfg)) {
       const local = read(CACHE_KEY, {});
