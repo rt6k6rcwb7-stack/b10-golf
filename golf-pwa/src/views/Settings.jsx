@@ -1,66 +1,64 @@
 import { useState } from 'react';
 import Modal, { Field, inputCls } from '../components/Modal.jsx';
-import { hasBuiltinServer, inviteLink, isStandalone, parseInvite, testConfig, withDefaults } from '../lib/cloud.js';
+import { hasBuiltinServer, isStandalone, parseInvite, testConfig, withDefaults } from '../lib/cloud.js';
+import { authErrorText, getSession, sendLoginCode, signOut, verifyLoginCode } from '../lib/auth.js';
+
+const APP_URL = () => `${location.origin}${location.pathname}`;
 
 export default function Settings({ S, shared, me, setMe, onClose }) {
-  const { cfg, connect, status, sync } = shared;
-  const [f, setF] = useState(() => cfg || { url: '', key: '', code: '' });
-  const [invite, setInvite] = useState('');
+  const { cfg, connect, status, sync, queueLocalChanges } = shared;
+  const session = getSession();
+  const [email, setEmail] = useState(() => session?.email || localStorage.getItem('golf.lastEmail') || '');
+  const [otp, setOtp] = useState('');
+  const [step, setStep] = useState('email'); // email | code
+  const [busy, setBusy] = useState(false);
+  const [authMsg, setAuthMsg] = useState(null);
+  const [showCode, setShowCode] = useState(false);
   const [groupCode, setGroupCode] = useState('');
-  const [showInvite, setShowInvite] = useState(!hasBuiltinServer);
-  const [manual, setManual] = useState(false);
-  const [msg, setMsg] = useState(null);
-  const [link, setLink] = useState(null);
+  const [codeMsg, setCodeMsg] = useState(null);
+  const [shareMsg, setShareMsg] = useState(null);
   const players = Object.values(S.players).sort((a, b) => a.name.localeCompare(b.name));
 
-  async function tryConnect(c) {
-    setMsg('Prüfe Verbindung …');
+  async function requestCode() {
+    setBusy(true); setAuthMsg(null);
     try {
-      await testConfig(c);
-      connect(c);
-      setMsg('Verbunden.');
-    } catch (e) {
-      setMsg(e.status === 401 || e.status === 403 || e.status === 404 ? 'Abgelehnt – Adresse, Schlüssel oder Tabelle prüfen.' : 'Keine Verbindung – Internet prüfen oder später erneut versuchen.');
-    }
+      await sendLoginCode(email);
+      try { localStorage.setItem('golf.lastEmail', email.trim()); } catch { /* egal */ }
+      setStep('code');
+      setAuthMsg('Code verschickt – bitte E-Mail öffnen (auch im Spam-Ordner schauen) und den 6-stelligen Code eingeben.');
+    } catch (e) { setAuthMsg(authErrorText(e)); } finally { setBusy(false); }
   }
-  // Nur Gruppen-Code: Server ist in der App hinterlegt. Ein falscher Code liefert leere Daten –
-  // deshalb prüfen, ob die Gruppe Spieler hat.
+  async function login() {
+    setBusy(true); setAuthMsg(null);
+    try {
+      queueLocalChanges();
+      await verifyLoginCode(email, otp);
+      setOtp(''); setStep('email'); setAuthMsg('Angemeldet.');
+      sync();
+    } catch (e) { setAuthMsg(authErrorText(e)); } finally { setBusy(false); }
+  }
+
+  // Übergang: Gruppen-Code (bis „Übergang beenden“)
   async function connectCode() {
-    const c = withDefaults({ code: groupCode });
-    setMsg('Prüfe Gruppen-Code …');
+    const parsed = parseInvite(groupCode);
+    const c = parsed || withDefaults({ code: groupCode });
+    setCodeMsg('Prüfe …');
     try {
       const rows = await testConfig(c);
-      if (!rows || !rows.length) { setMsg('Gruppen-Code falsch – bitte genau so eingeben, wie ihn die B10 bekommen hat (Groß-/Kleinschreibung).'); return; }
+      if (!rows || !rows.length) { setCodeMsg('Gruppen-Code falsch oder nicht mehr gültig – bitte mit E-Mail anmelden.'); return; }
       connect(c);
-      setMsg('Verbunden.');
+      setCodeMsg('Verbunden.');
     } catch {
-      setMsg('Keine Verbindung – Internet prüfen oder später erneut versuchen.');
+      setCodeMsg('Keine Verbindung – Internet prüfen oder später erneut versuchen.');
     }
   }
-  function connectInvite(text) {
-    const c = parseInvite(text);
-    if (!c) { setMsg('Das ist keine gültige Einladung. Bitte den ganzen Link oder Code einfügen.'); return; }
-    tryConnect(c);
-  }
-  async function pasteInvite() {
-    try {
-      const t = await navigator.clipboard.readText();
-      setInvite(t);
-      connectInvite(t);
-    } catch {
-      setMsg('Einfügen nicht erlaubt – bitte lange ins Feld tippen und „Einsetzen“ wählen.');
-    }
-  }
-  async function share() {
-    const l = inviteLink(cfg);
+
+  async function shareApp() {
+    const text = `B10 Golf: ${APP_URL()} – in Safari öffnen → Teilen → „Zum Home-Bildschirm“ → App starten → mit deiner E-Mail anmelden (Code kommt per Mail).`;
     if (navigator.share) {
-      try { await navigator.share({ title: 'B10 Golf', text: 'Einladung zur B10-Golf-App – Link antippen, dann bist du verbunden:', url: l }); return; } catch (e) { if (e?.name === 'AbortError') return; }
+      try { await navigator.share({ title: 'B10 Golf', text }); return; } catch (e) { if (e?.name === 'AbortError') return; }
     }
-    try { await navigator.clipboard.writeText(l); setLink('kopiert'); } catch { setLink(l); }
-  }
-  async function copyLink() {
-    const l = inviteLink(cfg);
-    try { await navigator.clipboard.writeText(l); setLink('kopiert'); } catch { setLink(l); }
+    try { await navigator.clipboard.writeText(text); setShareMsg('Text kopiert.'); } catch { setShareMsg(text); }
   }
 
   return (
@@ -72,7 +70,7 @@ export default function Settings({ S, shared, me, setMe, onClose }) {
         </select>
       </Field>
 
-      <h3 className="text-lg font-black">B10-Gruppe (gemeinsame Daten)</h3>
+      <h3 className="text-lg font-black">B10-Gruppe</h3>
       <div className={`rounded-xl px-3 py-2 text-sm font-bold ${status.state === 'online' ? 'bg-turf-100 text-turf-900' : status.state === 'local' ? 'bg-neutral-100' : 'bg-amber-100 text-amber-950'}`}>
         {status.state === 'online' && `Verbunden · zuletzt abgeglichen ${new Date(status.at).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}`}
         {status.state === 'syncing' && 'Gleiche ab …'}
@@ -81,60 +79,73 @@ export default function Settings({ S, shared, me, setMe, onClose }) {
         {status.pending > 0 && ` · ${status.pending} Änderung(en) warten auf Upload`}
       </div>
 
-      {cfg ? (
+      {session ? (
         <div className="flex flex-col gap-2">
-          <button className="btn-primary" onClick={share}>Einladung an Freunde senden</button>
-          <button className="btn" onClick={copyLink}>Einladungslink kopieren</button>
-          {link === 'kopiert' && <div className="text-sm font-bold text-turf-800">Kopiert.</div>}
-          {link && link !== 'kopiert' && <textarea readOnly className={`${inputCls} h-24 font-mono text-xs`} value={link} onFocus={(e) => e.target.select()} />}
-          <p className="text-sm text-neutral-600">Die Einladung enthält den Gruppen-Code – nur an die B10 schicken.{hasBuiltinServer ? ` Alternativ einfach den Code weitergeben: ${cfg.code}` : ''}</p>
+          <div className="rounded-xl border-2 border-turf-900 p-3">
+            <div className="label">Angemeldet als</div>
+            <div className="break-all text-lg font-bold">{session.email}</div>
+          </div>
+          <button className="btn" onClick={shareApp}>App an Freunde schicken</button>
+          {shareMsg && <div className="text-sm">{shareMsg}</div>}
+          <p className="text-sm text-neutral-600">Anmelden können sich nur eingeladene E-Mail-Adressen (Supabase → Authentication → Users → „Invite user“).</p>
           <button className="btn" onClick={sync}>Jetzt abgleichen</button>
-          <button className="text-sm font-bold text-red-700 underline" onClick={() => { connect(null); setF({ url: '', key: '', code: '' }); setMsg(null); }}>Verbindung auf diesem Gerät trennen</button>
+          <button className="text-sm font-bold text-red-700 underline" onClick={() => { signOut(); setAuthMsg(null); }}>Abmelden</button>
         </div>
-      ) : (
+      ) : hasBuiltinServer ? (
         <div className="flex flex-col gap-2">
-          {isStandalone() && (
-            <p className="rounded-xl bg-amber-100 p-3 text-sm text-amber-950">
-              Die App auf dem Home-Bildschirm hat ihren eigenen Speicher. Einmal verbinden – dann bleibt sie verbunden.
-            </p>
+          {isStandalone() && !enabledByCode(cfg) && (
+            <p className="rounded-xl bg-amber-100 p-3 text-sm text-amber-950">Die App auf dem Home-Bildschirm hat ihren eigenen Speicher – hier einmal anmelden, dann bleibst du angemeldet.</p>
           )}
-          {hasBuiltinServer && (
+          {enabledByCode(cfg) && (
+            <p className="rounded-xl bg-amber-100 p-3 text-sm text-amber-950">Übergangsweise mit Gruppen-Code verbunden. Bitte jetzt mit deiner E-Mail anmelden – der Gruppen-Code wird bald abgeschaltet.</p>
+          )}
+          {step === 'email' ? (
             <>
-              <Field label="Gruppen-Code">
-                <input className={`${inputCls} text-lg`} value={groupCode} onChange={(e) => setGroupCode(e.target.value)}
-                  autoCapitalize="off" autoCorrect="off" spellCheck={false} placeholder="z. B. B10-…" />
+              <Field label="E-Mail-Adresse">
+                <input className={`${inputCls} text-lg`} type="email" inputMode="email" autoComplete="email" autoCapitalize="off" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="name@beispiel.de" />
               </Field>
-              <button className="btn-primary" disabled={groupCode.trim().length < 4} onClick={connectCode}>Verbinden</button>
-              {msg && <div className="text-sm font-bold">{msg}</div>}
-              <button className="self-start text-sm font-bold text-turf-800 underline" onClick={() => setShowInvite(!showInvite)}>
-                {showInvite ? 'Einladung ausblenden' : 'Stattdessen Einladungslink einfügen'}
-              </button>
+              <button className="btn-primary" disabled={busy || !/.+@.+\..+/.test(email.trim())} onClick={requestCode}>{busy ? 'Sende …' : 'Code per E-Mail senden'}</button>
+            </>
+          ) : (
+            <>
+              <Field label={`Code aus der E-Mail an ${email.trim()}`}>
+                <input className={`${inputCls} tnum text-center text-3xl tracking-[0.4em]`} inputMode="numeric" autoComplete="one-time-code" maxLength={10}
+                  value={otp} onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))} placeholder="••••••" />
+              </Field>
+              <button className="btn-primary" disabled={busy || otp.length < 6} onClick={login}>{busy ? 'Prüfe …' : 'Anmelden'}</button>
+              <div className="flex justify-between text-sm font-bold text-turf-800">
+                <button className="underline" onClick={() => { setStep('email'); setOtp(''); setAuthMsg(null); }}>Andere E-Mail</button>
+                <button className="underline" disabled={busy} onClick={requestCode}>Code neu senden</button>
+              </div>
             </>
           )}
-          {showInvite && (<>
-          <Field label="Einladung einfügen (Link oder Code)">
-            <textarea className={`${inputCls} h-24 font-mono text-xs`} value={invite} onChange={(e) => setInvite(e.target.value)}
-              placeholder="https://…/b10-golf/#setup=…" />
-          </Field>
-          <div className="grid grid-cols-2 gap-2">
-            <button className="btn" onClick={pasteInvite}>Aus Zwischenablage</button>
-            <button className="btn-primary" disabled={!invite.trim()} onClick={() => connectInvite(invite)}>Verbinden</button>
-          </div>
-          {msg && !hasBuiltinServer && <div className="text-sm font-bold">{msg}</div>}
-          </>)}
-          <button className="self-start text-sm font-bold text-turf-800 underline" onClick={() => setManual(!manual)}>
-            {manual ? 'Manuelle Eingabe ausblenden' : 'Ohne Einladung: Supabase-Daten manuell eintragen'}
-          </button>
-          {manual && (
-            <div className="flex flex-col gap-2">
-              <Field label="Supabase-URL"><input className={inputCls} value={f.url} placeholder="https://xyz.supabase.co" onChange={(e) => setF({ ...f, url: e.target.value })} /></Field>
-              <Field label="Anon-Key"><input className={inputCls} value={f.key} onChange={(e) => setF({ ...f, key: e.target.value })} /></Field>
-              <Field label="Gruppen-Code"><input className={inputCls} value={f.code} onChange={(e) => setF({ ...f, code: e.target.value })} /></Field>
-              <button className="btn-primary" disabled={!f.url || !f.key || !f.code} onClick={() => tryConnect({ url: f.url.trim(), key: f.key.trim(), code: f.code.trim() })}>Verbinden</button>
-            </div>
+          {authMsg && <div className="text-sm font-bold">{authMsg}</div>}
+
+          {!enabledByCode(cfg) && (
+            <>
+              <button className="mt-2 self-start text-sm font-bold text-neutral-600 underline" onClick={() => setShowCode(!showCode)}>
+                {showCode ? 'Gruppen-Code ausblenden' : 'Übergangsweise: mit Gruppen-Code verbinden'}
+              </button>
+              {showCode && (
+                <div className="flex flex-col gap-2">
+                  <Field label="Gruppen-Code oder Einladungslink">
+                    <input className={inputCls} value={groupCode} onChange={(e) => setGroupCode(e.target.value)} autoCapitalize="off" autoCorrect="off" spellCheck={false} />
+                  </Field>
+                  <button className="btn" disabled={groupCode.trim().length < 4} onClick={connectCode}>Mit Code verbinden</button>
+                  {codeMsg && <div className="text-sm font-bold">{codeMsg}</div>}
+                </div>
+              )}
+            </>
+          )}
+          {enabledByCode(cfg) && (
+            <button className="self-start text-sm font-bold text-red-700 underline" onClick={() => connect(null)}>Gruppen-Code-Verbindung trennen</button>
           )}
         </div>
+      ) : (
+        <p className="text-sm text-neutral-600">In dieser App-Version ist keine Datenbank hinterlegt (src/config.js).</p>
       )}
     </Modal>
   );
 }
+
+const enabledByCode = (cfg) => !!(cfg && cfg.code && !cfg.auth);

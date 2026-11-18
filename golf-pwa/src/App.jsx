@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { hasBuiltinServer, isStandalone, readSetupFromHash, useShared } from './lib/cloud.js';
+import { getSession } from './lib/auth.js';
 import { useHoleImages } from './lib/holeImages.js';
 import seedData from './data/seed.json';
 import MyGolf from './views/MyGolf.jsx';
@@ -26,8 +27,9 @@ export default function App() {
   const [tab, setTab] = useState(() => read(TAB_KEY, 'runden'));
   const [me, setMeRaw] = useState(() => read(ME_KEY, null));
   // Erster Start ohne Verbindung: gleich nach dem Gruppen-Code fragen
-  const [settingsOpen, setSettingsOpen] = useState(() => hasBuiltinServer && !shared.cfg && !read('golf.welcomed.v1', false));
-  useEffect(() => { if (settingsOpen) write('golf.welcomed.v1', true); }, [settingsOpen]);
+  // Einmal pro Gerät zur Anmeldung auffordern (auch wenn es übergangsweise per Gruppen-Code verbunden ist)
+  const [settingsOpen, setSettingsOpen] = useState(() => hasBuiltinServer && !getSession() && !read('golf.loginPrompted.v1', false));
+  useEffect(() => { if (settingsOpen) write('golf.loginPrompted.v1', true); }, [settingsOpen]);
   const setMe = (id) => { setMeRaw(id); write(ME_KEY, id); };
   useEffect(() => write(TAB_KEY, tab), [tab]);
 
@@ -77,7 +79,7 @@ export default function App() {
 
       {!cfg && (tab !== 'runden' || isStandalone()) && (
         <button className="m-4 mb-0 rounded-2xl bg-amber-100 p-3 text-left text-sm text-amber-950" onClick={() => setSettingsOpen(true)}>
-          <b>Nicht mit der B10-Gruppe verbunden.</b> Änderungen sieht nur dieses Gerät. Tippen und den Gruppen-Code eingeben.
+          <b>Nicht mit der B10-Gruppe verbunden.</b> Änderungen sieht nur dieses Gerät. Tippen und mit deiner E-Mail anmelden.
         </button>
       )}
 

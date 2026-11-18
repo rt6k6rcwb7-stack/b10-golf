@@ -13,22 +13,26 @@ Golfrunden mit Freunden.
 - **Spieler** und **Plätze** (Par, HCP, Besonderheiten je Loch, Abschläge mit CR/Slope, GPS-Punkte der Grüns – auf dem Platz einmessbar, Lochbilder).
 - Funktioniert offline; Änderungen werden hochgeladen, sobald wieder Netz da ist.
 
-## Gemeinsame Daten (Supabase)
-Spieler, Plätze, Turniere, Scorekarten und Lochbilder liegen in einer kostenlosen Supabase-Datenbank.
-Adresse und *anon key* stehen in [`golf-pwa/src/config.js`](golf-pwa/src/config.js) – sie dürfen öffentlich sein,
-denn Lesen und Schreiben erlaubt die Datenbank nur mit dem **Gruppen-Code**. Der steht nie im Repository.
+## Gemeinsame Daten (Supabase) und Anmeldung
+Spieler, Plätze, Turniere, Scorekarten und Lochbilder liegen in einer Supabase-Datenbank (Adresse und öffentlicher
+*anon key* in [`golf-pwa/src/config.js`](golf-pwa/src/config.js)).
 
-**Jedes Gerät einmal verbinden:** App öffnen → Gruppen-Code eingeben → **Verbinden**. Danach bleibt es verbunden.
-(Alternativ den Einladungslink aus ⚙︎ → „Einladung an Freunde senden“ öffnen.)
+**Zugang:** Anmeldung mit E-Mail-Adresse und 6-stelligem Code aus der E-Mail. Nur eingeladene Adressen können sich
+anmelden (die App legt nie Konten an). Lesen und Schreiben erlauben die Datenbank-Regeln „mitglieder …“ nur
+angemeldeten Mitgliedern. **Übergangsweise** funktioniert noch der Gruppen-Code (Regeln „uebergang …“), bis alle
+umgestellt sind.
 
-Neue Datenbank einrichten (nur einmal, schon erledigt): Supabase-Projekt anlegen, im **SQL Editor**
-[`golf-pwa/supabase/setup.sql`](golf-pwa/supabase/setup.sql) ausführen (vorher `GRUPPEN-CODE` ersetzen), dann
-*Project URL* und *anon public key* in `golf-pwa/src/config.js` eintragen.
+Einrichtung in Supabase (einmalig):
+1. **Authentication → Sign In / Providers**: „Allow new users to sign up“ **aus**.
+2. **Eigener E-Mail-Versand (SMTP)** unter *Authentication → Emails → SMTP Settings* – der eingebaute Versand stellt
+   nur an Mitglieder des Supabase-Teams zu (und max. wenige Mails pro Stunde).
+3. **Authentication → Emails → Magic Link**: Vorlage so ändern, dass sie den Code `{{ .Token }}` enthält.
+4. **Authentication → Users → Invite user**: alle B10-Mitglieder einladen.
 
 ## Auf dem iPhone installieren
 1. https://rt6k6rcwb7-stack.github.io/b10-golf/ in **Safari** öffnen → Teilen → **Zum Home-Bildschirm**.
-2. Die App vom Home-Bildschirm starten und den **Gruppen-Code** eingeben. (Die Home-Bildschirm-App hat einen eigenen
-   Speicher – deshalb dort verbinden, nicht in Safari.)
+2. Die App vom Home-Bildschirm starten → E-Mail eingeben → Code aus der Mail eintippen. (Die Home-Bildschirm-App hat
+   einen eigenen Speicher – deshalb dort anmelden, nicht in Safari.)
 
 ## Ordner
 - `golf-pwa/` – die App (React, Vite, Tailwind), siehe `golf-pwa/README.md`

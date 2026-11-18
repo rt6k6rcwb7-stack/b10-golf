@@ -5,6 +5,7 @@
 // (auch wenn auf dem Platz gerade kein Netz ist).
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { SUPABASE_ANON_KEY, SUPABASE_URL } from '../config.js';
+import { accessToken, getSession, onAuthChange } from './auth.js';
 
 export const COLLECTIONS = ['players', 'courses', 'tournaments', 'scores'];
 const CFG_KEY = 'golf.cloud.v1';
@@ -20,9 +21,14 @@ const write = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } ca
 export const hasBuiltinServer = !!(SUPABASE_URL && SUPABASE_ANON_KEY);
 export const withDefaults = (c) => (c && c.code ? { url: c.url || SUPABASE_URL, key: c.key || SUPABASE_ANON_KEY, code: String(c.code).trim() } : null);
 const isDefault = (c) => baseUrl(c.url) === baseUrl(SUPABASE_URL) && c.key === SUPABASE_ANON_KEY;
-export const loadConfig = () => withDefaults(read(CFG_KEY, null));
+// Verbindung = angemeldet (bevorzugt) oder übergangsweise Gruppen-Code
+export const loadConfig = () => {
+  const stored = withDefaults(read(CFG_KEY, null));
+  if (getSession() && hasBuiltinServer) return { url: SUPABASE_URL, key: SUPABASE_ANON_KEY, code: stored?.code || null, auth: true };
+  return stored;
+};
 export const saveConfig = (c) => (c ? write(CFG_KEY, isDefault(c) ? { code: c.code } : c) : localStorage.removeItem(CFG_KEY));
-export const enabled = (c) => !!(c && c.url && c.key && c.code);
+export const enabled = (c) => !!(c && c.url && c.key && (c.code || c.auth));
 
 // Einladung: Link …/#setup=<code> oder nur der <code>.
 // Der Code ist base64url ohne "="-Auffüllung – Messenger (WhatsApp usw.) schneiden sonst das Linkende ab.
@@ -68,24 +74,26 @@ export const isStandalone = () => window.navigator.standalone === true || window
 // Adresse vereinheitlichen: angehängtes /rest/v1 und Schrägstriche entfernen
 export const baseUrl = (url) => String(url || '').trim().replace(/\/+$/, '').replace(/\/rest\/v1$/, '').replace(/\/+$/, '');
 
-export function api(cfg, path, opts = {}) {
-  return fetch(`${baseUrl(cfg.url)}/rest/v1/${path}`, {
+// Angemeldet: Anmelde-Token (Regeln „mitglieder …“). Sonst übergangsweise Gruppen-Code (Regeln „uebergang …“).
+export async function api(cfg, path, opts = {}, retried = false) {
+  const token = cfg.auth ? await accessToken({ force: retried }) : null;
+  const r = await fetch(`${baseUrl(cfg.url)}/rest/v1/${path}`, {
     ...opts,
     headers: {
       apikey: cfg.key,
-      Authorization: `Bearer ${cfg.key}`,
-      'x-b10-code': cfg.code,
+      Authorization: `Bearer ${token || cfg.key}`,
+      ...(!token && cfg.code ? { 'x-b10-code': cfg.code } : {}),
       'Content-Type': 'application/json',
       ...(opts.headers || {}),
     },
-  }).then(async (r) => {
-    if (!r.ok) {
-      const e = new Error(`Supabase ${r.status}`);
-      e.status = r.status;
-      throw e;
-    }
-    return r.status === 204 || r.headers.get('content-length') === '0' ? null : r.json().catch(() => null);
   });
+  if (r.status === 401 && token && !retried) return api(cfg, path, opts, true); // Token abgelaufen → erneuern, einmal wiederholen
+  if (!r.ok) {
+    const e = new Error(`Supabase ${r.status}`);
+    e.status = r.status;
+    throw e;
+  }
+  return r.status === 204 || r.headers.get('content-length') === '0' ? null : r.json().catch(() => null);
 }
 
 // Verbindung prüfen: Lesen muss gehen; mit falschem Gruppen-Code liefert die Tabelle nichts.
@@ -113,6 +121,7 @@ function pushOne(cfg, op) {
 
 export function useShared() {
   const [cfg, setCfg] = useState(loadConfig);
+  useEffect(() => onAuthChange(() => setCfg(loadConfig())), []);
   const [data, setData] = useState(() => ({ ...Object.fromEntries(COLLECTIONS.map((c) => [c, {}])), ...read(CACHE_KEY, {}) }));
   const [status, setStatus] = useState({ state: enabled(loadConfig()) ? 'syncing' : 'local', pending: read(QUEUE_KEY, []).length, at: null, error: null });
   const queue = useRef(read(QUEUE_KEY, []));
@@ -194,10 +203,10 @@ export function useShared() {
     });
   }, []);
 
-  const connect = useCallback((raw) => {
-    const c = raw ? withDefaults(raw) : null;
-    // Bisher nur lokal erfasste Daten beim ersten Verbinden mit hochladen
-    if (c && !enabled(cfg)) {
+  // Bisher nur lokal erfasste Daten beim ersten Verbinden/Anmelden mit hochladen
+  const queueLocalChanges = useCallback(() => {
+    if (enabled(cfg)) return;
+    {
       const local = read(CACHE_KEY, {});
       const ops = [];
       // Nur selbst Angelegtes/Geändertes hochladen, nicht die mitgelieferten Startdaten
@@ -206,9 +215,14 @@ export function useShared() {
       queue.current = ops;
       write(QUEUE_KEY, ops);
     }
-    saveConfig(c);
-    setCfg(c);
   }, [cfg]);
 
-  return { data, save, remove, status, cfg, connect, sync, seed };
+  const connect = useCallback((raw) => {
+    const c = raw ? withDefaults(raw) : null;
+    if (c) queueLocalChanges();
+    saveConfig(c);
+    setCfg(loadConfig());
+  }, [queueLocalChanges]);
+
+  return { data, save, remove, status, cfg, connect, sync, seed, queueLocalChanges };
 }
