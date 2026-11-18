@@ -8,6 +8,7 @@ import Tournaments from './views/Tournaments.jsx';
 import Players from './views/Players.jsx';
 import Courses from './views/Courses.jsx';
 import Settings from './views/Settings.jsx';
+import { Datenschutz, Impressum } from './views/Legal.jsx';
 
 const ME_KEY = 'golf.me.v1';
 const TAB_KEY = 'golf.tab.v1';
@@ -28,6 +29,7 @@ export default function App() {
   const [me, setMeRaw] = useState(() => read(ME_KEY, null));
   // Erster Start ohne Verbindung: gleich nach dem Gruppen-Code fragen
   // Einmal pro Gerät zur Anmeldung auffordern (auch wenn es übergangsweise per Gruppen-Code verbunden ist)
+  const [legal, setLegal] = useState(null); // 'impressum' | 'datenschutz'
   const [settingsOpen, setSettingsOpen] = useState(() => hasBuiltinServer && !getSession() && !read('golf.loginPrompted.v1', false));
   useEffect(() => { if (settingsOpen) write('golf.loginPrompted.v1', true); }, [settingsOpen]);
   const setMe = (id) => { setMeRaw(id); write(ME_KEY, id); };
@@ -88,6 +90,10 @@ export default function App() {
         {tab === 'turniere' && <Tournaments S={S} save={save} remove={remove} me={me} imgs={imgs} />}
         {tab === 'spieler' && <Players S={S} save={save} remove={remove} me={me} setMe={setMe} />}
         {tab === 'plaetze' && <Courses S={S} save={save} remove={remove} imgs={imgs} />}
+        <footer className="flex justify-center gap-4 px-4 pb-4 pt-8 text-sm text-neutral-500">
+          <button className="underline" onClick={() => setLegal('impressum')}>Impressum</button>
+          <button className="underline" onClick={() => setLegal('datenschutz')}>Datenschutz</button>
+        </footer>
       </main>
 
       <nav className="fixed inset-x-0 bottom-0 z-20 border-t-2 border-neutral-200 bg-white pb-[env(safe-area-inset-bottom)]">
@@ -101,7 +107,10 @@ export default function App() {
         </div>
       </nav>
 
-      {settingsOpen && <Settings S={S} shared={shared} me={me} setMe={setMe} onClose={() => setSettingsOpen(false)} />}
+      {settingsOpen && <Settings S={S} shared={shared} me={me} setMe={setMe} onClose={() => setSettingsOpen(false)}
+        onLegal={(which) => { setSettingsOpen(false); setLegal(which); }} />}
+      {legal === 'impressum' && <Impressum onClose={() => setLegal(null)} onOther={() => setLegal('datenschutz')} />}
+      {legal === 'datenschutz' && <Datenschutz onClose={() => setLegal(null)} onOther={() => setLegal('impressum')} />}
     </div>
   );
 }

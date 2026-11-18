@@ -5,7 +5,7 @@ import { authErrorText, getSession, sendLoginCode, signOut, verifyLoginCode } fr
 
 const APP_URL = () => `${location.origin}${location.pathname}`;
 
-export default function Settings({ S, shared, me, setMe, onClose }) {
+export default function Settings({ S, shared, me, setMe, onClose, onLegal }) {
   const { cfg, connect, status, sync, queueLocalChanges } = shared;
   const session = getSession();
   const [email, setEmail] = useState(() => session?.email || localStorage.getItem('golf.lastEmail') || '');
@@ -105,6 +105,10 @@ export default function Settings({ S, shared, me, setMe, onClose }) {
                 <input className={`${inputCls} text-lg`} type="email" inputMode="email" autoComplete="email" autoCapitalize="off" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="name@beispiel.de" />
               </Field>
               <button className="btn-primary" disabled={busy || !/.+@.+\..+/.test(email.trim())} onClick={requestCode}>{busy ? 'Sende …' : 'Code per E-Mail senden'}</button>
+              <p className="text-xs text-neutral-600">
+                Deine E-Mail-Adresse wird nur für die Anmeldung verwendet. Details in der{' '}
+                <button className="font-bold underline" onClick={() => onLegal('datenschutz')}>Datenschutzerklärung</button>.
+              </p>
             </>
           ) : (
             <>
@@ -144,6 +148,10 @@ export default function Settings({ S, shared, me, setMe, onClose }) {
       ) : (
         <p className="text-sm text-neutral-600">In dieser App-Version ist keine Datenbank hinterlegt (src/config.js).</p>
       )}
+      <div className="flex justify-center gap-4 border-t-2 border-neutral-100 pt-3 text-sm text-neutral-500">
+        <button className="underline" onClick={() => onLegal('impressum')}>Impressum</button>
+        <button className="underline" onClick={() => onLegal('datenschutz')}>Datenschutz</button>
+      </div>
     </Modal>
   );
 }
